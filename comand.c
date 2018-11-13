@@ -344,11 +344,11 @@ byte Input_yes_no(pointer prompt, byte y_type) {
     Print_prompt(&null_str);     /* delete the prompt to avoid confusion */
     Put_goto(i_col, i_row);        /* PUT CURSOR BACK */
     ch = Upper(ch);
-    if (ch != CONTROLC)
+    if (ch != CONTROLC)             // CONTROLC will be treated as TRUE
         if (y_type)
-            ch = (ch != 'N');
+            ch = (ch != 'N') ? _TRUE : _FALSE;
         else
-            ch = (ch == 'Y');
+            ch = (ch == 'Y') ? _TRUE : _FALSE;
     return ch;
 
 } /* input_yes_no */
