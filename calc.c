@@ -411,10 +411,10 @@ static dword Get_offset(word block_num, pointer offset_in_block) {
     }
     else if (block_num == oa.wk1_blocks) {
         if (offset_in_block >= oa.high_s) {
-            offset = offset_in_block - oa.high_s + oa.low_e - oa.low_s;
+            offset = (dword)(offset_in_block - oa.high_s + oa.low_e - oa.low_s);
         }
         else {
-            offset = offset_in_block - oa.low_s;
+            offset = (dword)(offset_in_block - oa.low_s);
         }
         offset = offset + oa.wk1_blocks * oa.block_size;
     }
@@ -604,7 +604,7 @@ static void Calc_error(pointer err_msg) {
         tok_ptr++;
     }
     tok_ptr[0] = '#';
-    len = len1 = tok_ptr - input_buffer;
+    len = len1 = (byte)(tok_ptr - input_buffer);
     if (len1 > 10) len1 = 10;
     input_buffer[len - len1] = len1;
     Add_str_str(&input_buffer[len - len1]);
@@ -1020,7 +1020,7 @@ static pointer Get_quoted_string() {
     }
     if (tok_ptr > limit)
         Calc_error("\x19" "missing string terminator"); /* does not return */
-    tmp_str[0] = tok_ptr - start;
+    tmp_str[0] = (byte)(tok_ptr - start);
     memcpy(&tmp_str[1], start, tmp_str[0]);
     tok_ptr++;
     Scan(); /* next token must be CR (checked by calc_statement) */

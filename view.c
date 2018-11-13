@@ -36,7 +36,7 @@ void Movmem(pointer from_word, pointer to_word, word len) {
     saver = oa.toff[ed_tagw];
 
     last_moved = from_word + len - 1;
-    distance = to_word - from_word;
+    distance = (int)(to_word - from_word);
     for (i = 1; i <= num_tag; i++) {
         if (oa.tblock[i] == oa.wk1_blocks && oa.toff[i] >= from_word
             && oa.toff[i] <= last_moved)
@@ -108,12 +108,12 @@ void Re_window() {
     if (cursor == oa.high_s)
         return;
     if (cursor < oa.low_e) {            /* MOVE THE WINDOW UP */
-        len = oa.low_e - cursor;
+        len = (word)(oa.low_e - cursor);
         oa.high_s = oa.high_s - len;
         Movmem(cursor, oa.high_s, len);
         oa.low_e = cursor;
     } else {                            /* MOVE THE WINDOW DOWN */
-        len = cursor - oa.high_s;
+        len = (word)(cursor - oa.high_s);
         Movmem(oa.high_s, oa.low_e, len);
         oa.high_s = cursor;
         oa.low_e = oa.low_e + len;

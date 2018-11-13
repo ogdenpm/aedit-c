@@ -102,12 +102,13 @@ byte Cmd_ci() {
 
     /* SEE IF EXECUTING A MACRO */
     ch = Supply_macro_char();
-    if (macro_exec_level > 0)
+    if (macro_exec_level > 0) {
 #ifdef UNIX
         if (ch == LF)
             ch = CR;
 #endif
-    return ch;    /* YES, GOT CHAR FROM MACRO */
+        return ch;    /* YES, GOT CHAR FROM MACRO */
+    }
 
     last_coded = last_code - first_code;
 
@@ -280,12 +281,14 @@ void Add_str_special(pointer str_p) {
             else {
                 Add_three(ch);
             }
-#ifdef UNIX
+
         }
+#ifdef UNIX
         else if (ch == LF) {
             Add_str_str("\x4" "<nl>");
-#endif
+
         }
+#endif
         else if (ch == TAB) {
             Add_str_str("\x5" "<TAB>");
         }
@@ -948,12 +951,13 @@ void Print_input_line() {
                 else {
                     num = 3;
                 }
-#ifdef UNIX
+
             }
+#ifdef UNIX
             else if (ch == LF) {
                 num = 4;
-#endif
             }
+#endif
             else if (ch == TAB) {
                 num = 5;
             }

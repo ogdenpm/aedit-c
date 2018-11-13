@@ -54,7 +54,7 @@ static void Jump_prior_boln() {
         word len;
 
     while (1) {
-        len = oa.low_e - oa.low_s + 10; /* length of memory to be scanned */
+        len = (word)(oa.low_e - oa.low_s + 10); /* length of memory to be scanned */
         ptr = oa.low_e - len;
         cursor = ptr + findrb(ptr, LF, len) + 1;
         if (cursor == oa.low_s) {

@@ -51,7 +51,7 @@ void main(int argc, char **argv) {
     int len = 0;
 
     for (int i = 0; i < argc; i++)      // work out length of command line
-        len += strlen(argv[i]) + 1;     // + 1 for space
+        len += (int)(strlen(argv[i]) + 1);     // + 1 for space
     cmdLine = (pointer)malloc(len + 2); // add cr, lf and null - trailing space used for cr
     strcpy(cmdLine, argv[0]);           // start of command line
     for (int i = 1; i < argc; i++) {    // add other args each preceeded by a space
@@ -71,7 +71,7 @@ word findb(byte *str, byte ch, word cnt) {
     byte *s;
     s = (byte *)memchr(str, ch, cnt);
     if (s)
-        return s - str;
+        return (word)(s - str);
     return 0xffff;
 
 }
@@ -81,7 +81,7 @@ word findrb(byte *str, byte ch, word cnt) {
     byte *s;
     for (s = str + cnt - 1; s >= str; s--)
         if (*s == ch)
-            return s - str;
+            return (word)(s - str);
     return 0xffff;
 
 }
@@ -163,7 +163,7 @@ void dq_change_extension(pointer path_p, pointer extension_p, wpointer excep_p) 
                 *s++ = *extension_p;
         }
     }
-    *path_p = s - path_p - 1;                   // set the new length
+    *path_p = (byte)(s - path_p - 1);                   // set the new length
 }
 
 
@@ -195,14 +195,12 @@ byte dq_get_argument(pointer argument_p, wpointer excep_p) {
                         *cmdLine--;
                     excep = E_STRING_BUFFER;
                 }
-            }
-            else
+            } else
                 quote = 0;
-            
-        } else if (*cmdLine == '\'' || *cmdLine == '"') {
+
+        } else if (*cmdLine == '\'' || *cmdLine == '"')
             quote = *cmdLine++;
-        }
-        else if (isDelim(*cmdLine))
+        else if (isDelim(*cmdLine) && (*cmdLine != '-' || cnt == 0))    // allow embedded - in filenames
                 break;
         else if (cnt == 80)
             excep = E_STRING_BUFFER;
@@ -220,7 +218,7 @@ byte dq_get_argument(pointer argument_p, wpointer excep_p) {
 }
 
 word dq_switch_buffer(pointer buffer_p, wpointer excep_p) {
-    word off = cmdLine - cmdLineStart;
+    word off = (word)(cmdLine - cmdLineStart);
     cmdLine = cmdLineStart = buffer_p;
     quote = 0;
     *excep_p = E_OK;

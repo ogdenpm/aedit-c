@@ -378,7 +378,7 @@ logical Find() {
             if (oa.high_s + target[0] < oa.high_s) /* overflow */
                 goto none_in_block;
 
-            locs = oa.high_e - oa.high_s - target[0];
+            locs = (word)(oa.high_e - oa.high_s - target[0]);
             /* now locs is the number of possible starting locations */
     /*
             IF token_find=TRUE
@@ -448,7 +448,7 @@ logical Find() {
         while (_TRUE) {
             if (oa.low_e < target[0] + oa.low_s) goto none_in_back_block;
             match_char_p = oa.low_e - target[0];
-            locs = match_char_p - oa.low_s + 1;
+            locs = (word)(match_char_p - oa.low_s + 1);
             /* now locs is the number of possible starting locations */
 
             if (locs == 0) goto none_in_back_block; /* redundant ? */

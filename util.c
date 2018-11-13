@@ -19,7 +19,7 @@
 // Min & Max replaced by macros to support different number types
 
 word Size_of_text_in_memory() {
-    return oa.high_e - oa.high_s + oa.low_e - oa.low_s;
+    return (word)(oa.high_e - oa.high_s + oa.low_e - oa.low_s);
 } /* size_of_text_in_memory */
 
 

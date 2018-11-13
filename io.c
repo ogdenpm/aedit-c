@@ -937,7 +937,7 @@ static void Expand_window() {
         /*    NOW RECOVER THE LOW SPACE. NOTICE THAT ONE MORE BYTE THAN
             NECESSARY IS MOVED - THIS IS TO PRESERVE TAGS AT OA.LOW_E.     */
 
-        Movmem(limit, oa.low_s, oa.low_e - limit + 1);
+        Movmem(limit, oa.low_s, (word)(oa.low_e - limit + 1));
 
         oa.low_e = oa.low_e - oa.block_size;
 
@@ -985,7 +985,7 @@ static void Expand_window() {
 
         /*    MOVE MEMORY UP TO RECLAIM SPACE    */
 
-        Movmem(oa.high_s, oa.high_s + oa.block_size, limit - oa.high_s);
+        Movmem(oa.high_s, oa.high_s + oa.block_size, (word)(limit - oa.high_s));
         oa.high_s = oa.high_s + oa.block_size;
         if (oa.wk2_blocks == 0 && oa.more_input == _FALSE) Add_eof();
     }
@@ -1257,7 +1257,7 @@ static void Write_to_tagi(byte nfile, byte do_delete) {
         block_low = block_high = 0;
 
     while (oa.tblock[target_tag] > oa.wk1_blocks) {
-        size_out = oa.high_e - oa.high_s;
+        size_out = (word)(oa.high_e - oa.high_s);
         Write(nfile, oa.high_s, size_out);
         if (nfile == block_file) {
             if (block_low + size_out > 0xffff)
@@ -1274,7 +1274,7 @@ static void Write_to_tagi(byte nfile, byte do_delete) {
 
     /*    WRITE REST OF TEXT  BUT NOT THE EOF MARKER */
 
-    size_out = oa.toff[target_tag] - oa.high_s;
+    size_out = (word)(oa.toff[target_tag] - oa.high_s);
     Write(nfile, oa.high_s, size_out);
     if (nfile == block_file) {
         if (block_low + size_out > 0xffff)

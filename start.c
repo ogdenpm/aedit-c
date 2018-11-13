@@ -196,7 +196,7 @@ static void Setup_memory() {
     ratio = 2;
 
 
-    memory_size = oa.high_e - oa.low_s;
+    memory_size = (word)(oa.high_e - oa.low_s);
     other_buffer_size = memory_size / ratio;
     block_size = ((other_buffer_size - 1024) / 3) & 0xfe00;
 
@@ -1256,9 +1256,9 @@ static void Write_entire_file(byte nfile) {
 
     Copy_wk1_file(nfile); /* COPY WK1 FILE TO OUTPUT */
     if (excep == 0) {
-        Write(nfile, oa.low_s, oa.low_e - oa.low_s); /* COPY BELOW WINDOW */
+        Write(nfile, oa.low_s, (word)(oa.low_e - oa.low_s)); /* COPY BELOW WINDOW */
         if (excep == 0) {
-            len_high = oa.high_e - oa.high_s;
+            len_high = (word)(oa.high_e - oa.high_s);
             if (oa.have_eof)
                 len_high--;
             Write(nfile, oa.high_s, len_high); /* COPY ABOVE WINDOW */
@@ -1423,7 +1423,7 @@ void O_cmnd() {
 
         Check_window(other_buffer_size);
         Movmem(oa.high_s, oa.high_s - other_buffer_size,
-            oa.high_e - oa.high_s + 1);
+            (word)(oa.high_e - oa.high_s + 1));
         oa.high_s = oa.high_s - other_buffer_size;
         oa.high_e = oa.high_e - other_buffer_size;
         start_at = oa.high_e + 4;

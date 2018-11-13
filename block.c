@@ -59,7 +59,7 @@ static byte Saved_in_block() {
     if (oa.tblock[ed_tagi] == oa.wk1_blocks) {    /* TAG MUST BE IN CURRENT
                                                     BLOCK */
         if (oa.toff[ed_tagi] >= oa.high_s) {    /* TAG IS IN HIGH PART */
-            len = oa.toff[ed_tagi] - oa.high_s;
+            len = (word)(oa.toff[ed_tagi] - oa.high_s);
             if (len <= block_buffer_size) {
                 in_block_buffer = len;
                 memcpy(block_buffer, oa.high_s, len); /* MOVE TEXT
@@ -69,7 +69,7 @@ static byte Saved_in_block() {
         }
         else {                                /* TAG IS IN LOW PART
                                                     OF TEXT */
-            len = oa.low_e - oa.toff[ed_tagi];
+            len = (word)(oa.low_e - oa.toff[ed_tagi]);
             if (len <= block_buffer_size) {
                 in_block_buffer = len;
                 memcpy(block_buffer, oa.toff[ed_tagi], len);
@@ -362,7 +362,7 @@ void G_cmnd() {
         /* MUST REMEMBER DISTANCE BETWEEN SAVED_FROM (STARTING POINT OF CURRENT
            LINE) AND LOW_E AS THE RE-WINDOW AT BEGINNING OF STUFF READ CAUSES
            SAVED_FROM AND HAVE(CURRENT LINE) TO POINT TO THE WRONG LOCATION */
-        was_saved_from = oa.low_e - saved_from;
+        was_saved_from = (word)(oa.low_e - saved_from);
 
         if (input_buffer[0] == 0)
             Read_block_file();
