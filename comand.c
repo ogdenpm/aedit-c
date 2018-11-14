@@ -473,11 +473,6 @@ static byte Add_input_buffer() {
                  left_code,
                  right_code,
                  undo_code };
-    byte codes2[] = { 4,
-             CONTROLC,
-             rubout_code,
-             n_var_code,
-             esc_code };
 
     byte codes3[] = { 14,
                  delete_left_code,
@@ -533,11 +528,13 @@ static byte Add_input_buffer() {
         edit_stat.last_cursor_key = 0;  /* illegal value */
 
 
-    switch (Find_index(ch, codes2)) {  /* illegal value */
+    switch (ch) {  /* illegal value */
 
 
-    case 0: return ch;  /* CONTROLC */
-    case 1: {            /* rubout_code */
+    case CONTROLC:      // CONTROL C or Escape
+    case esc_code:
+        return ch; 
+    case rubout_code: {            /* rubout_code */
         byte x;
         if (cur_pos > 0) {
             if (At_crlf(input_buffer, cur_pos, _TRUE))
@@ -555,7 +552,7 @@ static byte Add_input_buffer() {
             return 0;
     }
 
-    case 2: {    /* n_var_code */
+    case n_var_code: {    /* n_var_code */
         pointer str_p;
         byte i;
 
@@ -570,9 +567,7 @@ static byte Add_input_buffer() {
         }
         return ch;
     }
-    case 3:	return ch;  /* esc_code */
-    case 4:	/* default */
-        ;
+    // default falls through
     }
 
 
@@ -582,7 +577,7 @@ static byte Add_input_buffer() {
 
         switch (Find_index(ch, codes3)) {
 
-        case 0: { /* delete_left_code */
+        case delete_left_code: { /* delete_left_code */
             byte new_len;
             if (cur_pos > 0) {
                 new_len = input_buffer[0] - cur_pos;
@@ -595,7 +590,7 @@ static byte Add_input_buffer() {
             }
             return 0;
         }
-        case 2:	    /* CR */
+        case CR:	    /* CR */
             if (edit_stat.mode != from_input_line) {
 #ifdef MSDOS
                 Add_ch(CR);
@@ -605,7 +600,7 @@ static byte Add_input_buffer() {
             }
             /* fall through */
 
-        case 1:	/* delete_right_code */
+        case delete_right_code:	/* delete_right_code */
             if (ch == delete_right_code) {
                 ubuf_left = 0;
                 ubuf_used = input_buffer[0] - cur_pos;
@@ -615,7 +610,7 @@ static byte Add_input_buffer() {
             input_buffer[0] = cur_pos;
             return ch;
 
-        case 3:	/* delete_line_code */
+        case delete_line_code:	/* delete_line_code */
             ubuf_used = input_buffer[0];
             ubuf_left = cur_pos;
             memcpy(&ubuf[0], &input_buffer[1], ubuf_used);
@@ -627,7 +622,7 @@ static byte Add_input_buffer() {
             u_is_line = _TRUE;
             return 0;
 
-        case 4: { /* delete_code */
+        case delete_code: { /* delete_code */
             byte x;
             if (input_buffer[0] > cur_pos) {
                 x = At_crlf(input_buffer, cur_pos + 1, _FALSE) ? 1 : 0;
@@ -637,7 +632,7 @@ static byte Add_input_buffer() {
             return 0;
         }
 
-        case 5:	/* left_code */
+        case left_code:	/* left_code */
             if (cur_pos > 0) {
                 if (At_crlf(input_buffer, cur_pos, _TRUE))
                     cur_pos = cur_pos - 2;
@@ -649,7 +644,7 @@ static byte Add_input_buffer() {
             edit_stat.last_cursor_key = left_code;
             return 0;
 
-        case 6:	 /* right_code */
+        case right_code:	 /* right_code */
             if (cur_pos < input_buffer[0]) {
                 if (At_crlf(input_buffer, cur_pos + 1, _FALSE))
                     cur_pos = cur_pos + 2;
@@ -662,7 +657,7 @@ static byte Add_input_buffer() {
             edit_stat.last_cursor_key = right_code;
             return 0;
 
-        case 7: /* home_code */
+        case home_code: /* home_code */
             if (edit_stat.last_cursor_key == right_code) {
                 cur_pos = input_buffer[0];
             }
@@ -674,8 +669,8 @@ static byte Add_input_buffer() {
             }
             return 0;
 
-        case 8:	     /* undo_code */
-        case 9: {    /* s_var_code */
+        case undo_code:	     /* undo_code */
+        case s_var_code: {    /* s_var_code */
 
             word i;
             pointer char_base;
@@ -717,7 +712,7 @@ static byte Add_input_buffer() {
                 cur_pos = input_buffer[0];
             return 0;
         }
-        case 10: {    /* hexin_code */
+        case hexin_code: {    /* hexin_code */
 
             byte err;
             ch = Get_hexin(&err);
@@ -729,18 +724,16 @@ static byte Add_input_buffer() {
             return 0;
         }
 
-        case 11:  /* up_code */
+        case up_code:  /* up_code */
             AeditBeep();
             return 0;
-        case 12:   /* down_code */
+        case down_code:   /* down_code */
             AeditBeep();
             return 0;
-        case 13: /* macro_exec_code */
+        case macro_exec_code: /* macro_exec_code */
             AeditBeep();
             return 0;
-
-        case 14:  /* default case */
-            ;
+        // default falls through
         }
     }
 

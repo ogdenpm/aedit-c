@@ -29,14 +29,9 @@ static void Macro_insert();
  /*
   * End iRMX II.4 Fix, Part 4 of 8
   */
-#define TWOCH(c1, c2)   (((c1) << 8) + (ch2))
-
 
 
 byte memory[memory_leng];
-
-
-
 
 logical check_for_run_keys = { _TRUE };
 
@@ -73,8 +68,8 @@ pointer macros = memory;        /* CONTAINS MACROS - memory is allocated statica
 word macro_buf_size = { 3072 };
 
 pointer macro_at;            /* USEFUL POINTER TO MACRO LENGTHS    */
-#define macro_text_length   (*macro_at)             /* USED TO GET MACRO TEXT LENGTHS    */
-#define macro_name_length   (*(wpointer)macro_at)   /* USED TO GET MACRO NAME LENGTHS */
+#define macro_name_length   (*macro_at)             /* USED TO GET MACRO TEXT LENGTHS    */
+#define macro_text_length   (*(wpointer)macro_at)   /* USED TO GET MACRO NAME LENGTHS */
 pointer macro_end = memory;       /* NEXT FREE BYTE OF MACROS */
 
 
@@ -514,7 +509,8 @@ static byte Find_macro() {
     while (macro_at < macro_end) {        /* SEARCH BUFFER    */
         if (macro_name_length == input_buffer[0] &&
             /* MUST BE SAME LENGTH    */
-            Cmp_name(input_buffer, macro_at)) return _TRUE;
+            Cmp_name(input_buffer, macro_at))
+            return _TRUE;
         /* AND BE THE SAME    */
         macro_at += macro_name_length + sizeof(byte);
         macro_at += macro_text_length + sizeof(word);
@@ -1469,7 +1465,7 @@ static void Macro_save() {
             Insert_char('M');
             Insert_string(macro_at);
             Insert_char(esc_code);
-            temp = (macrotext_t *)(macro_at + macro_name_length + 1);
+            temp = (macrotext_t *)(macro_at + macro_name_length + sizeof(byte));
             index = 0;
             end_type = 0;
 
