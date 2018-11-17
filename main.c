@@ -289,7 +289,7 @@ void dq_decode_exception(word excep_code, pointer message_p, word maxLen) {
 
 void co_write(byte *buf, word len) {
     while (len-- > 0)
-        _putch(*buf++);
+        putchar(*buf++);
 }
 
 static byte ci_mode = 1;
