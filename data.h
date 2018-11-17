@@ -188,7 +188,7 @@ extern byte prompt_number;
 
 /*****     COMAND.PLM     *****/
 
-extern boolean pause;
+extern boolean pause_before_continue;
 extern boolean strip_parity;
 extern boolean in_input_line;
 

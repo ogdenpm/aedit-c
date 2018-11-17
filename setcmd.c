@@ -426,7 +426,7 @@ static void Set_notab() {
 
 
 static void Set_pause() {
-    Set_input_yes_no("\x18" "Pause before continuing?", &pause);
+    Set_input_yes_no("\x18" "Pause before continuing?", &pause_before_continue);
 } /* set_pause */
 
 
