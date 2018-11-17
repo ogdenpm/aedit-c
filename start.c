@@ -992,7 +992,6 @@ static void Parse_tail() {
 
     in_invocation_line = _TRUE;
 #ifndef MSDOS
-    dq_special(5, "", &excep);      /* set case sensitivity */
     Echeck();
     Convert_xenix_format()
 #endif
