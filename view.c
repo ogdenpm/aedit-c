@@ -158,12 +158,10 @@ void Rebuild(byte r_row, pointer newp, pointer oldp) {
     /*    THIRD, IF THE LONGER STRING HAS TRAILING BLANKS THEN CHOP THEM OFF */
 
     if (r_row != prompt_line) {
-        while (new_len > old_len && newp[new_len] == ' ') {
+        while (new_len > old_len && newp[new_len] == ' ')
             new_len--;
-        }
-        while (new_len < old_len && oldp[old_len] == ' ') {
+        while (new_len < old_len && oldp[old_len] == ' ')
             old_len--;
-        }
     }
 
     /*    FOURTH, IF NO CHANGE THEN ALL DONE */
@@ -188,7 +186,7 @@ void Rebuild(byte r_row, pointer newp, pointer oldp) {
 
         if (new_len == old_len)
             while (newp[new_len] == oldp[new_len] && new_len > 0) {
-                old_len = new_len--;
+                old_len = --new_len;
             }
 
         /* if we have a new prompt then reprint the character attr. */
@@ -817,8 +815,10 @@ void Re_view() {
             }
         } else if (have[message_line] <= oa.high_s) {
             /* OFF BOTTOM OF SCREEN */
-            if (have[message_line] >= oa.low_e) i = 1;
-            else i = Count_lines(have[message_line], oa.low_e) + 1;
+            if (have[message_line] >= oa.low_e)
+                i = 1;
+            else
+                i = Count_lines(have[message_line], oa.low_e) + 1;
             /* DO NOT SCROLL IF IN MACRO */
             if (i < prompt_line - first_text_line && (In_macro_exec() == _FALSE
                                                       || dont_stop_macro_output)) {
@@ -834,9 +834,8 @@ void Re_view() {
             start = have[first_text_line];  /* STILL WITHIN DISPLAY */
         }
 
-    } else {             /* FOR RE_VIEW - FLAG NOTHING ON SCREEN */
+    } else              /* FOR RE_VIEW - FLAG NOTHING ON SCREEN */
         memset(&have[first_text_line], 0, sizeof(have[0]) * (message_line - first_text_line));
-    }
 
     if (start == 0) {
 
