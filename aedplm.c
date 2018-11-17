@@ -118,22 +118,21 @@ pointer Unfold(pointer textp, pointer image_p) {
 
     /* unfold_loop: */
     while (1) {
-        ch = Printable(textp[0]);
-        textp++;
+        ch = Printable(*textp++);
         if (ch != TAB && ch != LF) {
             if (++actual_col == wrapping_column)
                 goto lf_case;
             if (actual_col <= l_col)
                 continue;
-            image_index++;
-            if (image_index > 80) {
+            if (++image_index > 80) {
                 image_index--;
                 ch = '!';
             }
             image_p[image_index] = ch;
             continue;
         }
-        if (ch == LF) goto lf_case;
+        if (ch == LF)
+            goto lf_case;
         count = tab_to[actual_col];
         ch = print_as[' '];
         /*      tab_loop: */
@@ -169,8 +168,7 @@ pointer Unfold(pointer textp, pointer image_p) {
             return oa.high_e;
         }
         if (ch != LF && actual_col == wrapping_column) {
-            image_index++;
-            if (image_index >= 80)
+            if (++image_index >= 80)
                 image_index--;
             image_p[image_index] = '+';
         }

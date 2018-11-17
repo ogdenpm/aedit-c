@@ -1301,19 +1301,16 @@ nestedProc void Exchange_a_char(byte ch, boolean string_input) {
     }
     else {
         if (high_s_byte != CR && high_s_byte != LF && oa.high_s + 1 < oa.high_e) {
-            xbuf[xbuf_index] = high_s_byte;
-            xbuf_index++;
-            oa.high_s = oa.high_s + 1;
+            xbuf[xbuf_index++] = high_s_byte;
+            oa.high_s++;
         }
-        else {
+        else
             xbuf_added++;
-        }
-        if ((ch == CR || ch == LF) && !string_input) {
+        if ((ch == CR || ch == LF) && !string_input)
             Crlf_and_indent();
-        }
         else {
             low_e_byte = ch;                /* INSERT ONE CHARACTER */
-            oa.low_e = oa.low_e + 1;
+            oa.low_e++;
         }
         /* the byte at high_s is deleted, and the new char is inserted
            at low_e. if a tag was pointing to high_s, it must point now
@@ -1323,8 +1320,10 @@ nestedProc void Exchange_a_char(byte ch, boolean string_input) {
             if (oa.tblock[i] == oa.wk1_blocks
                 && oa.toff[i] >= oa.low_e
                 && oa.toff[i] < oa.high_s) {
-                if (oa.low_e > oa.low_s) oa.toff[i] = oa.low_e - 1;
-                else oa.toff[i] = oa.high_s;
+                if (oa.low_e > oa.low_s)
+                    oa.toff[i] = oa.low_e - 1;
+                else
+                    oa.toff[i] = oa.high_s;
             }
         }
         if (in_other != w_in_other)
@@ -1348,7 +1347,8 @@ void X_cmnd() {
     // a_begin_loop:
     while ((ch = Cmd_ci()) != esc_code) {
 
-        if (ch != home_code) last_move_command = 0; /* undefined */
+        if (ch != home_code)
+            last_move_command = 0; /* undefined */
 
         Clear_message();
         count = 1;                                /* NO REPEAT */
@@ -1359,12 +1359,11 @@ void X_cmnd() {
             continue;
         }
 
-        if (Move_cmnd(ch) || Dispatched(ch, x_reset_dispatch)) {
+        if (Move_cmnd(ch) || Dispatched(ch, x_reset_dispatch))
             /* A MOVE RESETS START LOC  AND CLEARS THE X BUFFER.
                A DELETE LINE AND DELETE LEFT ALSO RESETS
                STARTING X LOCATION. DELETE RIGHT DOES NOT  */
             Xbuf_clean();
-        }
         else {
             Save_line(row);                /* MAY MODIFY CURRENT LINE */
             if (ch == n_var_code) {
@@ -1376,7 +1375,8 @@ void X_cmnd() {
                 }
                 string_input = _TRUE;
                 for (k = 1; k <= str_p[0]; k++) {
-                    if (str_p[k] == LF) V_cmnd();
+                    if (str_p[k] == LF)
+                        V_cmnd();
                     Exchange_a_char(str_p[k], string_input);
                 }
                 string_input = _FALSE;
@@ -1390,7 +1390,8 @@ void X_cmnd() {
                 }
                 string_input = _TRUE;
                 for (k = 1; k <= str_p[0]; k++) {
-                    if (str_p[k] == LF) V_cmnd();
+                    if (str_p[k] == LF)
+                        V_cmnd();
                     Exchange_a_char(str_p[k], string_input);
                 }
                 string_input = _FALSE;
@@ -1405,7 +1406,8 @@ void X_cmnd() {
                 }
                 if (err == 0) {/* no error */
                     string_input = _TRUE;
-                    if (ch == LF) V_cmnd();
+                    if (ch == LF)
+                        V_cmnd();
                     Exchange_a_char(ch, string_input);
                     string_input = _FALSE;
                 }
@@ -1414,7 +1416,8 @@ void X_cmnd() {
                 if (Dispatched(ch, x_dispatch) == _FALSE) /* SPECIAL CASES */
                     if (Is_illegal(ch)) {
                         /* check for control-key macros (since it can't be an xch char) */
-                        if (!Single_char_macro(ch)) AeditBeep();
+                        if (!Single_char_macro(ch))
+                            AeditBeep();
                     }
                     else {
                         word rpt_count;
@@ -1424,9 +1427,8 @@ void X_cmnd() {
                             rpt_count = tab_to[virtual_col]; /* NEED FOR TAB EXPANSION */
                             ch = ' ';
                         }
-                        for (j = 1; j <= rpt_count; j++) {
+                        for (j = 1; j <= rpt_count; j++)
                             Exchange_a_char(ch, string_input);
-                        }
                     }
                 if (ch == CONTROLC) return;
             }
