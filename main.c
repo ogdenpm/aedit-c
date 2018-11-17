@@ -230,7 +230,7 @@ word dq_switch_buffer(pointer buffer_p, wpointer excep_p) {
 struct {
     FILE *fp;
     byte flags;
-    char name[_MAX_PATH];
+    char name[FILENAME_MAX];
 } _files[MAXFILES];
 
 

@@ -646,7 +646,7 @@ void Echeck_no_file() {
 */
 
 void Openi(byte fnum, byte nbuf) {
-    char fname[_MAX_PATH];
+    char fname[FILENAME_MAX];
 
     toCstr(fname, files[fnum].name);
     file_num = fnum;
@@ -681,7 +681,7 @@ static void Open_block(byte mode) {     // attached not used so this isn't calle
 
 byte Test_file_existence(byte fnum) {
     byte ans;
-    char fname[_MAX_PATH];
+    char fname[FILENAME_MAX];
     toCstr(fname, files[fnum].name);
 
     Working();
@@ -705,7 +705,7 @@ byte Test_file_existence(byte fnum) {
 */
 
 void Openo(byte fnum, byte mode, byte nbuf) {
-    char fname[_MAX_PATH];
+    char fname[FILENAME_MAX];
 
     toCstr(fname, files[fnum].name);
     file_num = fnum;

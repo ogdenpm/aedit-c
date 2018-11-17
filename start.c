@@ -1465,7 +1465,7 @@ void Q_cmnd() {
     byte eflag;
     connection conn;
     word texcep;
-    char fname[_MAX_PATH];
+    char fname[FILENAME_MAX];
     byte rename_done;   /* dhj  4/24/89 */
 
     rename_done = false;        /* dhj  4/24/89 */
