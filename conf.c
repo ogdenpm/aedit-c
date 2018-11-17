@@ -599,6 +599,9 @@ void Setup_terminal() {
         ANSI_setup();
         dos_system = _TRUE;
     }
+    else if (cmpb(&tmp_str[1], "UNIX", 4) == 0xffff) {
+        VT100_setup();
+    }
     else
         Reset_config();
 
