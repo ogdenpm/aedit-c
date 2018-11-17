@@ -23,6 +23,7 @@ pointer cmdLineStart;
 
 bool EnableVTMode()
 {
+#ifdef MSDOS
     COORD ssize = { 80, 25 };
     SMALL_RECT wsize = { 0, 0, 79, 24 };
     CONSOLE_SCREEN_BUFFER_INFOEX consoleScreenBufferInfoEx;
@@ -48,6 +49,7 @@ bool EnableVTMode()
     {
         return false;
     }
+#endif
     return true;
 }
 
