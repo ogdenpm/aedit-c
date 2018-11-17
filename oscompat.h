@@ -7,6 +7,6 @@
 #else
 
 #include <unistd.h>
-int kbhit(void);
+#include "unix.h"
 
 #endif

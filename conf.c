@@ -564,6 +564,9 @@ void VT100_setup() {
 
     first_coordinate = ANSI_RC;
 
+#ifdef UNIX
+    setup_stdin();
+#endif
 } /* VT100_setup */
 
 
@@ -620,6 +623,9 @@ void Restore_system_config() {
     if (!batch_mode) {
         Print_unconditionally_p(exit_config_list);
         Co_flush();
+#ifdef UNIX
+        restore_stdin();
+#endif
     }
 } /* restore_system_config */
 
