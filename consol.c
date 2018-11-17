@@ -19,6 +19,7 @@
 #include "type.h"
 #include "data.h"
 #include "proc.h"
+#include "unix.h"
 
 byte current_message[81] = { 0 }; /* CONTENTS OF MESSAGE LINE */
 byte last_message[81] = { 0 };

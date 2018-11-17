@@ -13,6 +13,7 @@
 #include "type.h"
 #include "data.h"
 #include "proc.h"
+#include "unix.h"
 
 /*   CONFIGURATION PROCEDURES AND VARIABLES. */
 

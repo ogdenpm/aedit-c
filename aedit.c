@@ -16,12 +16,12 @@
 #include <setjmp.h>     // for jmp_buf
 #include <stdlib.h>     // for system
 #include <stdbool.h>
+#include <signal.h>
 #include "lit.h"
 #include "type.h"
 #include "data.h"
 #include "proc.h"
-#include <signal.h>
-
+#include "unix.h"
 
  /**************************************************************************/
  /*                            Last_dispatch                               */

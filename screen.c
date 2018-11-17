@@ -12,6 +12,7 @@
 #include "type.h"
 #include "data.h"
 #include "proc.h"
+#include "unix.h"
 
 static void Actual_goto(byte goto_col, byte goto_row);
 

@@ -12,6 +12,7 @@
 #include "type.h"
 #include "data.h"
 #include "proc.h"
+#include "unix.h"
 #include <string.h>
 
 static void Macro_null();
