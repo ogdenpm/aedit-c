@@ -354,12 +354,6 @@ word ci_read(byte *buf) {
     }
 }
 
-
-
-void sleep(word n) {
-    // to implement
-}
-
 byte interface_buffer[100];
 /* The strings in interface_buffer are null-terminated and length preceeded. */
 

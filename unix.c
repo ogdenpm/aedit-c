@@ -1,9 +1,11 @@
 #ifdef UNIX
 
-#include <termios.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
+#include <errno.h>
 #include <signal.h>
+#include <termios.h>
+#include <time.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
 
 static struct termios original_term;
 
@@ -33,6 +35,17 @@ void Ignore_quit_signal(void) {
 void Restore_quit_signal(void) {
     signal(SIGINT, SIG_DFL);
     signal(SIGQUIT, SIG_DFL);
+}
+
+void ms_sleep(unsigned int milliseconds) {
+    int res;
+    struct timespec t;
+    t.tv_sec = milliseconds / 1000;
+    t.tv_nsec = (milliseconds % 1000) * 1000000;
+
+    do {
+        res = nanosleep(&t, &t);
+    } while (res == -1 && errno == EINTR);
 }
 
 #endif

@@ -50,10 +50,7 @@ static void Delay(word func) {
     Co_flush();
     /* delay 'func'/2 milliseconds on an 8MZ CPU */
     limit = delay_times[func];
-    for (i = 1; i <= limit; i++) {
-        sleep(8);
-    }
-
+    ms_sleep(limit >> 1);
 } /* delay */
 
 

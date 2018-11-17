@@ -400,7 +400,7 @@ void Error(pointer msg_p) {
             delay = 30;
         // TODO: rewite for high performance PC
         for (i = 1; i <= delay; i++) {     /* every cycle lasts 10 miliseconds @ 5MHz*/
-            sleep(100);
+            ms_sleep(10);
             Check_for_keys();
         }
         if (error_status.from_macro_file) {

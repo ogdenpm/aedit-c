@@ -102,7 +102,7 @@ static void Flush() {
                 for (i = 1; i <= co_buffer[0]; i++) {
                     co_write(&co_buffer[i], 1);
                     if (delay_after_each_char != 0xffff)  /* ffff - no delay */
-                        sleep(delay_after_each_char);
+                        ms_sleep(delay_after_each_char / 10);
                 }
             }
             else {
@@ -110,7 +110,7 @@ static void Flush() {
                 len = Min(delay_after_each_char - 0x8000, co_buffer[0] - index + 1);
                 while (len != 0) {
                     co_write(&co_buffer[index], len);
-                    sleep(1);
+                    ms_sleep(1);
                     index = index + len;
                     len = Min(delay_after_each_char - 0x8000, co_buffer[0] - index + 1);
                 }

@@ -5,7 +5,6 @@
 #define nestedProc  static
 void toCstr(char *cstr, byte *pstr);
 void co_write(byte *buf, word len);
-void sleep(word n);
 void set_ci_mode(byte mode);
 word ci_read(byte *buf);
 
