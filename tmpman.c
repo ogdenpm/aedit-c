@@ -13,7 +13,10 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <string.h>
+#include <errno.h>
+#ifdef MSDOS
 #include <io.h>
+#endif
 #include "lit.h"
 #include "type.h"
 #include "data.h"

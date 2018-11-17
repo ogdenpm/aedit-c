@@ -20,8 +20,12 @@
 #include "data.h"
 #include "proc.h"
 #include <memory.h>
-#include <io.h>
 #include <signal.h>
+#include <errno.h>
+#ifdef MSDOS
+#include <io.h>
+#endif
+#include "oscompat.h"
 
 
 byte memory[memory_leng];
@@ -1160,7 +1164,7 @@ static void Rename_as_bak() {
 
     /* rename only if there is a write permission */
 
-    if (_access(fname, 6) != 0)  /* no write permission */
+    if (access(fname, 6) != 0)  /* no write permission */
         return;
 
     Move_name(oa.input_name, oa.output_name);
@@ -1586,7 +1590,7 @@ void Q_cmnd() {
                             rflag = _TRUE;
                         }
                         toCstr(fname, oa.input_name);
-                        if (_access(fname, 0) == 0) {                   // exists
+                        if (access(fname, 0) == 0) {                    // exists
                             if ((conn = fopen(fname, "a")) == NULL) {   // but can't write to it
                                 if (errno == EACCES) {
                                     texcep = excep = errno;
@@ -1656,7 +1660,7 @@ void Q_cmnd() {
             }
             toCstr(fname, files[nfile].name);
             // check we can create the output file
-            if (_access(fname, 0) == 0) {           // file exists
+            if (access(fname, 0) == 0) {                // file exists
                 if ((conn = fopen(fname, "a")) == 0) {  // can't open it
                     if (errno == EACCES) {
                         texcep = excep = errno;

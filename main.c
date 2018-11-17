@@ -1,6 +1,4 @@
 #define DEFINE_CONSOLEV2_PROPERTIES
-#include <windows.h>
-#include <consoleapi.h>
 #include "lit.h"
 #include "type.h"
 #include "data.h"
@@ -8,11 +6,17 @@
 #include <memory.h>
 #include <stdio.h>
 #include <string.h>
-#include <io.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include <conio.h>
+#include <errno.h>
 
+#ifdef MSDOS
+#include <io.h>
+#include <conio.h>
+#include <windows.h>
+#include <consoleapi.h>
+#endif
+#include "oscompat.h"
 
 pointer cmdLine;
 pointer cmdLineStart;
@@ -255,7 +259,7 @@ void dq_seek(connection conn, byte mode, dword offset, wpointer excep_p) {
 void dq_delete(pointer path_p, wpointer excep_p) {
     char fname[FILENAME_MAX];
     toCstr(fname, path_p);
-    *excep_p = _unlink(fname) == 0 ? 0 : errno;
+    *excep_p = unlink(fname) == 0 ? 0 : errno;
 }
 
 
@@ -333,12 +337,12 @@ word ci_read(byte *buf) {
         }
         switch (ci_mode) {
         case 3:
-            if (_kbhit() == 0)   // if key then fall through
+            if (kbhit() == 0)   // if key then fall through
                 return 0;
         case 1:
-            c = _getch(); 
+            c = getchar();
             if (c == 0 || c == 0xe0) {
-                escSeq = mapExtended(c, _getch());
+                escSeq = mapExtended(c, getchar());
                 continue;       // with either pick up escape sequence or retry
             }
             else

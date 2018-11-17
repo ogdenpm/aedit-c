@@ -14,7 +14,11 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+#ifdef MSDOS
 #include <io.h>
+#endif
+#include "oscompat.h"
 #include "lit.h"
 #include "type.h"
 #include "data.h"
@@ -685,7 +689,7 @@ byte Test_file_existence(byte fnum) {
     toCstr(fname, files[fnum].name);
 
     Working();
-    if (!*fname || _access(fname, 0) != 0) {    // null file or doesn't exist
+    if (!*fname || access(fname, 0) != 0) {     // null file or doesn't exist
         excep = 0;
         return _FALSE;
     }
