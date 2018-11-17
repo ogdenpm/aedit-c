@@ -318,7 +318,7 @@ static void Open_if_necessary(byte file_num) {
 
     vf_base = &virtual_files[file_num];
     if (vf_base->status == detached_stat) {
-        if ((vf_base->conn = fopen(tmpnam(NULL), "wb")) == NULL) {
+        if ((vf_base->conn = tmpfile()) == NULL) {
             excep = errno;
             Check();
         }
