@@ -993,7 +993,7 @@ static void Parse_tail() {
     in_invocation_line = _TRUE;
 #ifndef MSDOS
     Echeck();
-    Convert_xenix_format()
+    Convert_xenix_format();
 #endif
         delim = ' ';
     at_eoln = _FALSE;
