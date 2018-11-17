@@ -44,7 +44,7 @@ byte msecs_per_pad_char;
 
 
 static void Delay(word func) {
-    word i; word limit;
+    word limit;
 
     if (delay_times[func] == 0)
         return;
