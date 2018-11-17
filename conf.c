@@ -564,9 +564,6 @@ void VT100_setup() {
 
     first_coordinate = ANSI_RC;
 
-#ifdef UNIX
-    setup_stdin();
-#endif
 } /* VT100_setup */
 
 
@@ -603,7 +600,10 @@ void Setup_terminal() {
         dos_system = _TRUE;
     }
     else if (cmpb(&tmp_str[1], "UNIX", 4) == 0xffff) {
-        VT100_setup();
+        ANSI_setup();
+#ifdef UNIX
+        setup_stdin();
+#endif
     }
     else
         Reset_config();
