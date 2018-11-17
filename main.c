@@ -148,7 +148,7 @@ void dq_change_extension(pointer path_p, pointer extension_p, wpointer excep_p) 
     int cnt = *path_p < 4 ? *path_p : 4;        // chars to check
     pointer s = path_p + *path_p;                 // end char;
 
-    while (cnt-- > 0 && *s != '.' && *s != '\\' && *s != '//')
+    while (cnt-- > 0 && *s != '.' && *s != '\\' && *s != '/')
         s--;
     
     if (*s != '.')
