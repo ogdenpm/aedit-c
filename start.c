@@ -1053,7 +1053,6 @@ void Alter_init() {
 
 #ifndef MSDOS
     Ignore_quit_signal();
-    Handle_ioctl();
 #endif
     input_expected_flag = _FALSE;
 #ifdef MSDOS
