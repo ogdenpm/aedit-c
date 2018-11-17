@@ -136,8 +136,6 @@ extern byte file_num;
 
 extern byte null_str;
 
-extern byte no_such_macro[];
-
 extern boolean force_writing;
 
 extern boolean do_type_ahead;
