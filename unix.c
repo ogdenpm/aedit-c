@@ -3,6 +3,7 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <signal.h>
 
 static struct termios original_term;
 
@@ -22,6 +23,16 @@ void setup_stdin(void) {
 
 void restore_stdin(void) {
     tcsetattr(STDIN_FILENO, TCSANOW, &original_term);
+}
+
+void Ignore_quit_signal(void) {
+    signal(SIGINT, SIG_IGN);
+    signal(SIGQUIT, SIG_IGN);
+}
+
+void Restore_quit_signal(void) {
+    signal(SIGINT, SIG_DFL);
+    signal(SIGQUIT, SIG_DFL);
 }
 
 #endif

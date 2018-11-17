@@ -351,8 +351,6 @@ pointer Unfold_to_screen(pointer line); /* IOCASM */
 
 /*****   XNXSYS.PLM   *****/
 pointer Getenv(pointer symbol_p);
-void Ignore_quit_signal();
-void Restore_quit_signal();
 
 /*!****   INFACE   *****/
 //address tgetstr_(pointer symbol_p);
