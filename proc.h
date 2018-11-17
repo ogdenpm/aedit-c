@@ -369,7 +369,7 @@ void Restore_quit_signal();
 
 
 byte Cli_command();
-void Co(byt);
+void Co(byte byt);
 void Construct_point(pointer buff_ptr, pointer point_ptr);
 void Dealias_cmd(word index);
 void Display_output(pointer buff_ptr);
