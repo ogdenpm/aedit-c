@@ -112,8 +112,8 @@ dispatch_t m_dispatch[8] = {
     'S', Macro_save,
     0, 0 };
 
-byte no_more_room[] = { 23, "no more room for macros" };
-byte create_while_exec[] = { 55, "macro redefinition is forbidden while executing a macro" };
+byte no_more_room[] = { "\x17" "no more room for macros" };
+byte create_while_exec[] = { "\x37" "macro redefinition is forbidden while executing a macro" };
 
 
 byte state = { 0 };
@@ -160,7 +160,7 @@ void Macro_file_error(pointer string) {
 
 
 
-byte bad_msg[] = { 12, "bad __ value" };
+byte bad_msg[] = { "\x0c" "bad __ value" };
 
 static void Bad_value(pointer p) {
 
@@ -1402,7 +1402,7 @@ static void Macro_insert() {
 
 static void Macro_list() {
 
-    byte macros_str[] = { 9, " Macros: " };
+    byte macros_str[] = { "\x09" " Macros: " };
     byte message_len = config == SIV ? 40 : 60; /* length of message line w/o 'other' , 'forward' */
 
     /*!!!    CALL need_screen;   TURN OFF MACRO_SUPPRESS IF ON */
