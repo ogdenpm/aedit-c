@@ -1546,18 +1546,7 @@ void Q_cmnd() {
             while (oa.more_input) {        /* MUST READ ALL OF INPUT FILE */
                 i = Forward_file();
             }
-#ifndef MSDOS
-            /*
-             * Begin R2 Fix, Part 1, PPR 2988 AF to a remote dir and then during AEDIT
-             *               causes a GP error, 1/23/87
-             */
-             /* fix removed... unnecessary   dhj  4/24/89 */
-             /*            IF ch <>'W' and ch <>'E' THEN  */
-             /*
-              * End R2 Fix, Part 1, PPR 2988
-              */
-            Get_access_rights(oa.input_name);
-#endif
+
             Init_str(tmp_str, sizeof(tmp_str));
             if (ch == 'W') {        /* OUTPUT IS SPECIFIED */
                 nfile = util_file;
@@ -1698,19 +1687,7 @@ void Q_cmnd() {
                 Openi(nfile, 2);
             if (rflag)
                 Openi(in_file, 2);
-#ifndef MSDOS
-            /*
-             * Begin R2 Fix, Part 2, PPR 2988 AF to a remote dir and then during AEDIT
-             *               causes a GP error, 1/23/87
-             */
-             /* fix modified to set access rights only if renaming  dhj 4/24/89 */
-             /*            IF ch <>'W' and ch <>'E' THEN */
-            if (rename_done)
-                /*
-                 * End R2 Fix, Part 2, PPR 2988
-                 */
-                Put_access_rights(files[nfile].name);
-#endif
+
             Add_str_str("\x11" " has been written");
             if (tmp_str[0] > string_len)
                 tmp_str[0] = string_len;
