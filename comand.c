@@ -69,31 +69,15 @@ byte Is_illegal(byte ch) {
 
 
 
-
-/* TRIVIAL UTILITY FOR FOLLOWING RETURNS TRUE IF
-   CHAR COULD NOT BE THE START OF AN INPUT SEQUENCE */
-
-static byte Not_coded(byte ch) {
-    code_t *ibase;
-    for (ibase = input_codes; ibase <= &input_codes[last(input_codes)]; ibase++) {
-        if (ch == ibase->code[1] && ibase->code[0] > 0)
-            return _FALSE;
-    }
-
-    return _TRUE;
-} /* not_coded */
-
-
-
 /* INPUT COMMAND CHARACTER. PROGRAMMERS WITH
    DELICATE SENSIBILITIES SHOULD SKIP THIS ROUTINE. */
 
 byte Cmd_ci() {
 
-    byte ch, _short;
+    byte ch;
     wbyte i;
     match_t matched;
-    dword mask[5] = { 0, 0xff, 0xffff, 0xffffff, 0xffffffff };
+    static dword mask[5] = { 0, 0xff, 0xffff, 0xffffff, 0xffffffff };
     match_t *ibase;
     byte last_coded;
 
@@ -140,39 +124,36 @@ start_over:
 
     if (Have_controlc())
         return CONTROLC;
-    if (Not_coded(ch))
-        goto got_a_char;
     matched.length = 0;
-    _short = _TRUE;
-    while (_short) {
+    ibase = (match_t *)input_codes;
+    while (true) {
         /* assign the character read in to the matching string */
         matched.code[++matched.length] = ch;
 
-        ibase = (match_t *)input_codes;
+        bool havePrefix = false;
         for (i = 0; i <= last_coded; i++) {
-            /* see if first character matches */
-            if (matched.code[1] == ibase->code[1]) {
-                if ((matched.dw & mask[matched.length]) == (ibase->dw & mask[ibase->length])) {
-                    if (i == ignore_code - first_code)  /* FOUND AN IGNORE STRING */
+            // check for length & prefix match
+            if (matched.length <= ibase[i].length && ((matched.dw ^ ibase[i].dw) & mask[matched.length]) == 0) {
+                if (matched.length == ibase[i].length) {
+                    if (i == ignore_code - first_code)
                         goto start_over;
-                    ch = i + first_code;
-                    goto got_a_char;
-                }
-                /* if the first character matches and the lengths are the
-                    same, we have a string of right length, If the for loop
-                    ends and nothing matches, then we fall out of the
-                    while loop and beep at the guy
-                */
-                if (matched.length == ibase->code[0])
-                    _short = _FALSE;
+                    else {
+                        ch = i + first_code;
+                        goto got_a_char;
+                    }
+                } else
+                    havePrefix = true;
             }
-            ibase++;
         }
-        if (_short)
-            ch = Ci();
+        if (havePrefix && matched.length != 4)
+            ch = Ci();                          // try rest of prefix
+        else if (matched.length != 1) {         // at least one char was previously matched so error
+            AeditBeep();
+            goto start_over;
+        } else
+            break;                              // first char doesn't match so not coded
     }
-    AeditBeep();
-    goto start_over;
+
 
 got_a_char:
 #ifdef UNIX

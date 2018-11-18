@@ -286,7 +286,7 @@ static void Read_input_file() {
             Subtract_eof();
             if (recovery_mode == _FALSE) {    /* read in the input file */
                 while (oa.more_input &&
-                    (oa.high_s - oa.low_e) > oa.block_size + window_minimum) {
+                    (word)(oa.high_s - oa.low_e) > (word)(oa.block_size + window_minimum)) {
                     if ((numin = Read(in_file)) != oa.block_size) {
                         Detach_input();
                         Add_eof();
@@ -1660,10 +1660,9 @@ void Q_cmnd() {
                         excep = texcep;
                         return;
                     }
-                    else {
-                        excep = fclose(conn) ? errno : 0;
-                        Echeck();
-                    }
+                } else {
+                    excep = fclose(conn) ? errno : 0;
+                    Echeck();
                 }
             }
 

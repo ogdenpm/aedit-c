@@ -1013,7 +1013,7 @@ static void Expand_window() {
                                     AMOUNT OF EXTRA SPACE REQUIRED.
 */
 void Check_window(word plusplus) {
-    while ((oa.high_s - oa.low_e) < (window_minimum + plusplus)) {
+    while ((word)(oa.high_s - oa.low_e) < (word)(window_minimum + plusplus)) {
         Expand_window();
     }
 } /* check_window */
