@@ -147,8 +147,8 @@ start_over:
     while (_short) {
         /* assign the character read in to the matching string */
         matched.code[++matched.length] = ch;
-
         ibase = (match_t *)input_codes;
+        _short = _FALSE;
         for (i = 0; i <= last_coded; i++) {
             /* see if first character matches */
             if (matched.code[1] == ibase->code[1]) {
@@ -158,13 +158,10 @@ start_over:
                     ch = i + first_code;
                     goto got_a_char;
                 }
-                /* if the first character matches and the lengths are the
-                    same, we have a string of right length, If the for loop
-                    ends and nothing matches, then we fall out of the
-                    while loop and beep at the guy
-                */
-                if (matched.length == ibase->code[0])
-                    _short = _FALSE;
+
+                /* if detected sequence might still be matched, keep looping */
+                if ((matched.dw & mask[matched.length]) == (ibase->dw & mask[matched.length]) && matched.length < 4)
+                    _short = _TRUE;
             }
             ibase++;
         }
