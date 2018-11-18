@@ -336,8 +336,6 @@ END OF COMMENT */
 
    byte null_str = {0}; /* a null string */
 
-   static byte no_such_macro[] = {"\xd" "no such macro"};
-
    boolean force_writing = {_FALSE};
 
    boolean do_type_ahead = {1}; /* undefined */

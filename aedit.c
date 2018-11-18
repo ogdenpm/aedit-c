@@ -16,13 +16,12 @@
 #include <setjmp.h>     // for jmp_buf
 #include <stdlib.h>     // for system
 #include <stdbool.h>
+#include <signal.h>
 #include "lit.h"
 #include "type.h"
 #include "data.h"
 #include "proc.h"
-#include <signal.h>
-
-
+#include "oscompat.h"
  /**************************************************************************/
  /*                            Last_dispatch                               */
  /*                                                                        */
@@ -86,7 +85,7 @@ static void System_call() {
     Ignore_quit_signal();
     set_ci_mode(poll_mode ? 3 : 1);
     if (err && err < 256)
-        Error("\x20" "unable to execute system command"));
+        Error("\x20" "unable to execute system command");
 #endif
         Put_scroll_region(first_text_line, last_text_line);
         save_input_expected = input_expected_flag;

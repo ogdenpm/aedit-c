@@ -15,10 +15,13 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
+#include "oscompat.h"
 #include "lit.h"
 #include "type.h"
 #include "data.h"
 #include "proc.h"
+
+
 
 byte current_message[81] = { 0 }; /* CONTENTS OF MESSAGE LINE */
 byte last_message[81] = { 0 };
@@ -400,7 +403,7 @@ void Error(pointer msg_p) {
             delay = 30;
         // TODO: rewite for high performance PC
         for (i = 1; i <= delay; i++) {     /* every cycle lasts 10 miliseconds @ 5MHz*/
-            sleep(100);
+            ms_sleep(10);
             Check_for_keys();
         }
         if (error_status.from_macro_file) {

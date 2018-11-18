@@ -13,6 +13,7 @@
 #include "type.h"
 #include "data.h"
 #include "proc.h"
+#include "oscompat.h"
 
 /*   CONFIGURATION PROCEDURES AND VARIABLES. */
 
@@ -599,6 +600,12 @@ void Setup_terminal() {
         ANSI_setup();
         dos_system = _TRUE;
     }
+    else if (cmpb(&tmp_str[1], "UNIX", 4) == 0xffff) {
+        ANSI_setup();
+#ifdef UNIX
+        setup_stdin();
+#endif
+    }
     else
         Reset_config();
 
@@ -617,6 +624,9 @@ void Restore_system_config() {
     if (!batch_mode) {
         Print_unconditionally_p(exit_config_list);
         Co_flush();
+#ifdef UNIX
+        restore_stdin();
+#endif
     }
 } /* restore_system_config */
 

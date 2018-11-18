@@ -8,11 +8,12 @@
 *   agreement.                                                       *
 *********************************************************************/
 
+#include "oscompat.h"
+#include <string.h>
 #include "lit.h"
 #include "type.h"
 #include "data.h"
 #include "proc.h"
-#include <string.h>
 
 static void Macro_null();
 static void Macro_save();
@@ -112,8 +113,8 @@ dispatch_t m_dispatch[8] = {
     'S', Macro_save,
     0, 0 };
 
-byte no_more_room[] = { 23, "no more room for macros" };
-byte create_while_exec[] = { 55, "macro redefinition is forbidden while executing a macro" };
+byte no_more_room[] = { "\x17" "no more room for macros" };
+byte create_while_exec[] = { "\x37" "macro redefinition is forbidden while executing a macro" };
 
 
 byte state = { 0 };
@@ -160,7 +161,7 @@ void Macro_file_error(pointer string) {
 
 
 
-byte bad_msg[] = { 12, "bad __ value" };
+byte bad_msg[] = { "\x0c" "bad __ value" };
 
 static void Bad_value(pointer p) {
 
@@ -480,7 +481,7 @@ boolean Add_macro_char(byte ch) {
     if (new_macro->text + new_macro->text_length >= &macros[macro_buf_size]) {
         if (in_macro_def) {
             Error(no_more_room);
-            sleep(30000);  /* ~ 3 seconds */
+            ms_sleep(3000);
         }
         else {
             Macro_file_error(no_more_room);
@@ -1402,7 +1403,7 @@ static void Macro_insert() {
 
 static void Macro_list() {
 
-    byte macros_str[] = { 9, " Macros: " };
+    byte macros_str[] = { "\x09" " Macros: " };
     byte message_len = config == SIV ? 40 : 60; /* length of message line w/o 'other' , 'forward' */
 
     /*!!!    CALL need_screen;   TURN OFF MACRO_SUPPRESS IF ON */

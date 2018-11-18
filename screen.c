@@ -8,6 +8,7 @@
 *   agreement.                                                       *
 *********************************************************************/
 
+#include "oscompat.h"
 #include "lit.h"
 #include "type.h"
 #include "data.h"
@@ -43,17 +44,14 @@ byte msecs_per_pad_char;
 
 
 static void Delay(word func) {
-    word i; word limit;
+    word limit;
 
     if (delay_times[func] == 0)
         return;
     Co_flush();
     /* delay 'func'/2 milliseconds on an 8MZ CPU */
     limit = delay_times[func];
-    for (i = 1; i <= limit; i++) {
-        sleep(8);
-    }
-
+    ms_sleep(limit >> 1);
 } /* delay */
 
 

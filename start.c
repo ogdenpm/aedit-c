@@ -20,8 +20,12 @@
 #include "data.h"
 #include "proc.h"
 #include <memory.h>
-#include <io.h>
 #include <signal.h>
+#include <errno.h>
+#ifdef MSDOS
+#include <io.h>
+#endif
+#include "oscompat.h"
 
 
 byte memory[memory_leng];
@@ -988,9 +992,8 @@ static void Parse_tail() {
 
     in_invocation_line = _TRUE;
 #ifndef MSDOS
-    dq_special(5, "", &excep);      /* set case sensitivity */
     Echeck();
-    Convert_xenix_format()
+    Convert_xenix_format();
 #endif
         delim = ' ';
     at_eoln = _FALSE;
@@ -1049,7 +1052,6 @@ void Alter_init() {
 
 #ifndef MSDOS
     Ignore_quit_signal();
-    Handle_ioctl();
 #endif
     input_expected_flag = _FALSE;
 #ifdef MSDOS
@@ -1160,7 +1162,7 @@ static void Rename_as_bak() {
 
     /* rename only if there is a write permission */
 
-    if (_access(fname, 6) != 0)  /* no write permission */
+    if (access(fname, 6) != 0)  /* no write permission */
         return;
 
     Move_name(oa.input_name, oa.output_name);
@@ -1465,7 +1467,7 @@ void Q_cmnd() {
     byte eflag;
     connection conn;
     word texcep;
-    char fname[_MAX_PATH];
+    char fname[FILENAME_MAX];
     byte rename_done;   /* dhj  4/24/89 */
 
     rename_done = false;        /* dhj  4/24/89 */
@@ -1544,18 +1546,7 @@ void Q_cmnd() {
             while (oa.more_input) {        /* MUST READ ALL OF INPUT FILE */
                 i = Forward_file();
             }
-#ifndef MSDOS
-            /*
-             * Begin R2 Fix, Part 1, PPR 2988 AF to a remote dir and then during AEDIT
-             *               causes a GP error, 1/23/87
-             */
-             /* fix removed... unnecessary   dhj  4/24/89 */
-             /*            IF ch <>'W' and ch <>'E' THEN  */
-             /*
-              * End R2 Fix, Part 1, PPR 2988
-              */
-            Get_access_rights(oa.input_name);
-#endif
+
             Init_str(tmp_str, sizeof(tmp_str));
             if (ch == 'W') {        /* OUTPUT IS SPECIFIED */
                 nfile = util_file;
@@ -1586,7 +1577,7 @@ void Q_cmnd() {
                             rflag = _TRUE;
                         }
                         toCstr(fname, oa.input_name);
-                        if (_access(fname, 0) == 0) {                   // exists
+                        if (access(fname, 0) == 0) {                    // exists
                             if ((conn = fopen(fname, "a")) == NULL) {   // but can't write to it
                                 if (errno == EACCES) {
                                     texcep = excep = errno;
@@ -1656,7 +1647,7 @@ void Q_cmnd() {
             }
             toCstr(fname, files[nfile].name);
             // check we can create the output file
-            if (_access(fname, 0) == 0) {           // file exists
+            if (access(fname, 0) == 0) {                // file exists
                 if ((conn = fopen(fname, "a")) == 0) {  // can't open it
                     if (errno == EACCES) {
                         texcep = excep = errno;
@@ -1696,19 +1687,7 @@ void Q_cmnd() {
                 Openi(nfile, 2);
             if (rflag)
                 Openi(in_file, 2);
-#ifndef MSDOS
-            /*
-             * Begin R2 Fix, Part 2, PPR 2988 AF to a remote dir and then during AEDIT
-             *               causes a GP error, 1/23/87
-             */
-             /* fix modified to set access rights only if renaming  dhj 4/24/89 */
-             /*            IF ch <>'W' and ch <>'E' THEN */
-            if (rename_done)
-                /*
-                 * End R2 Fix, Part 2, PPR 2988
-                 */
-                Put_access_rights(files[nfile].name);
-#endif
+
             Add_str_str("\x11" " has been written");
             if (tmp_str[0] > string_len)
                 tmp_str[0] = string_len;

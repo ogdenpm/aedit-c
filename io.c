@@ -14,7 +14,11 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+#ifdef MSDOS
 #include <io.h>
+#endif
+#include "oscompat.h"
 #include "lit.h"
 #include "type.h"
 #include "data.h"
@@ -98,7 +102,7 @@ static void Flush() {
                 for (i = 1; i <= co_buffer[0]; i++) {
                     co_write(&co_buffer[i], 1);
                     if (delay_after_each_char != 0xffff)  /* ffff - no delay */
-                        sleep(delay_after_each_char);
+                        ms_sleep(delay_after_each_char / 10);
                 }
             }
             else {
@@ -106,7 +110,7 @@ static void Flush() {
                 len = Min(delay_after_each_char - 0x8000, co_buffer[0] - index + 1);
                 while (len != 0) {
                     co_write(&co_buffer[index], len);
-                    sleep(1);
+                    ms_sleep(1);
                     index = index + len;
                     len = Min(delay_after_each_char - 0x8000, co_buffer[0] - index + 1);
                 }
@@ -646,7 +650,7 @@ void Echeck_no_file() {
 */
 
 void Openi(byte fnum, byte nbuf) {
-    char fname[_MAX_PATH];
+    char fname[FILENAME_MAX];
 
     toCstr(fname, files[fnum].name);
     file_num = fnum;
@@ -681,11 +685,11 @@ static void Open_block(byte mode) {     // attached not used so this isn't calle
 
 byte Test_file_existence(byte fnum) {
     byte ans;
-    char fname[_MAX_PATH];
+    char fname[FILENAME_MAX];
     toCstr(fname, files[fnum].name);
 
     Working();
-    if (!*fname || _access(fname, 0) != 0) {    // null file or doesn't exist
+    if (!*fname || access(fname, 0) != 0) {     // null file or doesn't exist
         excep = 0;
         return _FALSE;
     }
@@ -705,7 +709,7 @@ byte Test_file_existence(byte fnum) {
 */
 
 void Openo(byte fnum, byte mode, byte nbuf) {
-    char fname[_MAX_PATH];
+    char fname[FILENAME_MAX];
 
     toCstr(fname, files[fnum].name);
     file_num = fnum;
@@ -1208,8 +1212,7 @@ void Write(byte nfile, pointer buf, word len) {
 
         if (config != SIIIE)
             Check_for_keys();
-        fwrite(buf, 1, len, files[nfile].conn);
-        excep = errno;
+        excep = fwrite(buf, 1, len, files[nfile].conn) != len ? errno : 0;
         Echeck();
         if (config != SIIIE)
             Check_for_keys();

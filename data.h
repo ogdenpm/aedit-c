@@ -136,8 +136,6 @@ extern byte file_num;
 
 extern byte null_str;
 
-extern byte no_such_macro[];
-
 extern boolean force_writing;
 
 extern boolean do_type_ahead;
@@ -188,7 +186,7 @@ extern byte prompt_number;
 
 /*****     COMAND.PLM     *****/
 
-extern boolean pause;
+extern boolean pause_before_continue;
 extern boolean strip_parity;
 extern boolean in_input_line;
 

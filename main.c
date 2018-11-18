@@ -1,24 +1,31 @@
 #define DEFINE_CONSOLEV2_PROPERTIES
+#ifdef MSDOS
+#include <io.h>
+#include <conio.h>
 #include <windows.h>
 #include <consoleapi.h>
+#endif
+#include <memory.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <errno.h>
+
 #include "lit.h"
 #include "type.h"
 #include "data.h"
 #include "proc.h"
-#include <memory.h>
-#include <stdio.h>
-#include <string.h>
-#include <io.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <conio.h>
 
+
+#include "oscompat.h"
 
 pointer cmdLine;
 pointer cmdLineStart;
 
 bool EnableVTMode()
 {
+#ifdef MSDOS
     COORD ssize = { 80, 25 };
     SMALL_RECT wsize = { 0, 0, 79, 24 };
     CONSOLE_SCREEN_BUFFER_INFOEX consoleScreenBufferInfoEx;
@@ -44,6 +51,7 @@ bool EnableVTMode()
     {
         return false;
     }
+#endif
     return true;
 }
 
@@ -148,7 +156,7 @@ void dq_change_extension(pointer path_p, pointer extension_p, wpointer excep_p) 
     int cnt = *path_p < 4 ? *path_p : 4;        // chars to check
     pointer s = path_p + *path_p;                 // end char;
 
-    while (cnt-- > 0 && *s != '.' && *s != '\\' && *s != '//')
+    while (cnt-- > 0 && *s != '.' && *s != '\\' && *s != '/')
         s--;
     
     if (*s != '.')
@@ -230,7 +238,7 @@ word dq_switch_buffer(pointer buffer_p, wpointer excep_p) {
 struct {
     FILE *fp;
     byte flags;
-    char name[_MAX_PATH];
+    char name[FILENAME_MAX];
 } _files[MAXFILES];
 
 
@@ -255,7 +263,7 @@ void dq_seek(connection conn, byte mode, dword offset, wpointer excep_p) {
 void dq_delete(pointer path_p, wpointer excep_p) {
     char fname[FILENAME_MAX];
     toCstr(fname, path_p);
-    *excep_p = _unlink(fname) == 0 ? 0 : errno;
+    *excep_p = unlink(fname) == 0 ? 0 : errno;
 }
 
 
@@ -289,7 +297,7 @@ void dq_decode_exception(word excep_code, pointer message_p, word maxLen) {
 
 void co_write(byte *buf, word len) {
     while (len-- > 0)
-        _putch(*buf++);
+        putchar(*buf++);
 }
 
 static byte ci_mode = 1;
@@ -333,10 +341,10 @@ word ci_read(byte *buf) {
         }
         switch (ci_mode) {
         case 3:
-            if (_kbhit() == 0)   // if key then fall through
+            if (kbhit() == 0)   // if key then fall through
                 return 0;
         case 1:
-            c = _getch(); 
+            c = _getch();
             if (c == 0 || c == 0xe0) {
                 escSeq = mapExtended(c, _getch());
                 continue;       // with either pick up escape sequence or retry
@@ -351,10 +359,11 @@ word ci_read(byte *buf) {
 }
 
 
-
-void sleep(word n) {
+#ifdef MSDOS
+void ms_sleep(unsigned n) {
     // to implement
 }
+#endif
 
 byte interface_buffer[100];
 /* The strings in interface_buffer are null-terminated and length preceeded. */

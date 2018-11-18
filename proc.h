@@ -5,9 +5,11 @@
 #define nestedProc  static
 void toCstr(char *cstr, byte *pstr);
 void co_write(byte *buf, word len);
-void sleep(word n);
 void set_ci_mode(byte mode);
 word ci_read(byte *buf);
+#ifdef MSDOS
+void ms_sleep(unsigned int milliseconds);
+#endif
 
 void Aedit();
 
@@ -351,8 +353,6 @@ pointer Unfold_to_screen(pointer line); /* IOCASM */
 
 /*****   XNXSYS.PLM   *****/
 pointer Getenv(pointer symbol_p);
-void Ignore_quit_signal();
-void Restore_quit_signal();
 
 /*!****   INFACE   *****/
 //address tgetstr_(pointer symbol_p);
@@ -369,7 +369,7 @@ void Restore_quit_signal();
 
 
 byte Cli_command();
-void Co(byt);
+void Co(byte byt);
 void Construct_point(pointer buff_ptr, pointer point_ptr);
 void Dealias_cmd(word index);
 void Display_output(pointer buff_ptr);

@@ -16,7 +16,7 @@
 
 static boolean At_crlf(pointer str_p, byte i, boolean left);
 
-boolean pause = _TRUE;
+boolean pause_before_continue = _TRUE;
 /* don't wait to a space in hit space */
 
 byte hit_space_text[] = { "\x17" RVID "hit space to continue " };
@@ -408,7 +408,7 @@ byte Hit_space() {
     boolean save_force_writing;
 
     /*BEGIN*/
-    if (!pause)
+    if (!pause_before_continue)
         return ' ';
     save_macro_level = macro_exec_level;
     macro_exec_level = 0;    /* GET ANSWER FROM ACTUAL CONSOLE and force prompt*/

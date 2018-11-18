@@ -190,7 +190,7 @@ boolean first_at_sign_is_here;
 /* prevents from writing extra chars if we don't need them */
 
 
-static void Draw_first_at_sign(ch) {
+static void Draw_first_at_sign(byte ch) {
     byte i;
 
     /* IF ON SCREEN, FIND THE ROW CONTAINING THE STARTING @    */
