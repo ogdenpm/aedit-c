@@ -556,7 +556,7 @@ static byte Add_input_buffer() {
 
     if (edit_stat.mode != single_char) {
 
-        switch (Find_index(ch, codes3)) {
+        switch (ch) {
 
         case delete_left_code: { /* delete_left_code */
             byte new_len;
