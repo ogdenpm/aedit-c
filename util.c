@@ -28,7 +28,7 @@ word Size_of_text_in_memory() {
 */
 
 void Move_name(pointer fromp, pointer top) {
-
+#pragma warning(suppress:26451)
     memcpy(top, fromp, *fromp + 1);
 } /* move_name */
 
@@ -39,6 +39,7 @@ void Move_name(pointer fromp, pointer top) {
     COMPARE TWO STRINGS
 */
 byte Cmp_name(pointer fromp, pointer top) {
+#pragma warning(suppress:26451)
     return memcmp(fromp, top, *fromp + 1) == 0 ? _TRUE : _FALSE;
 } /* cmp_name */
 
@@ -59,7 +60,7 @@ byte outfield[34];
 ***************************************************************************/
 pointer Print_number(dword d_number, byte b_width, byte base) {
 
-    byte hexdigits[16] = "0123456789ABCDEF";
+    static byte hexdigits[16] = "0123456789ABCDEF";
     byte field[34];       /* FIELD[0] IS UNUSED */
     byte fill_char;
     short i, places, width;

@@ -7,6 +7,11 @@
 #include <time.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
+#include "lit.h"
+#include "type.h"
+#include "proc.h"
+
 
 static struct termios original_term;
 
@@ -49,5 +54,39 @@ void ms_sleep(unsigned int milliseconds) {
         res = nanosleep(&t, &t);
     } while (res == -1 && errno == EINTR);
 }
+
+
+word access_rights = {0xffff};  /* 0FFFFH - invalid */
+
+void Get_access_rights(pointer path_p) {
+    
+        byte str[string_len_plus_2];
+        struct stat result;
+
+    Move_name (path_p, str);
+    str[str[0] + 1] = 0; /* convert to null-terminated */
+
+    if (stat(&str[1], &result) != 0) {
+        access_rights = 0xffff;  /* invalid */
+    } else {
+        access_rights = result.st_mode & 0777;
+    }
+
+} /* get_access_rights */
+
+
+
+void Put_access_rights(pointer path_p) { 
+        byte str[string_len_plus_2]; 
+
+    if (access_rights == 0xffff)
+        return;
+    Move_name (path_p, str);
+    str[str[0] + 1] = 0; /* convert to null-terminated */
+    chmod (str + 1, access_rights & 0777);
+    access_rights = 0xffff;
+
+} /* put_access_rights */
+
 
 #endif

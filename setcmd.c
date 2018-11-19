@@ -645,6 +645,7 @@ void S_cmnd() {
         else {
             ch = Input_command(set_prompts[set_prompt_number]);
             while (ch == TAB) {
+#pragma warning(suppress:26451)
                 set_prompt_number = (set_prompt_number + 1) % length(set_prompts);
                 ch = Input_command(set_prompts[set_prompt_number]);
             }

@@ -15,6 +15,7 @@
  * Find my initials: dhj
  */
 #include <stdlib.h>
+#include <string.h>
 #include "lit.h"
 #include "type.h"
 #include "data.h"
@@ -882,20 +883,20 @@ static void Add_param() {
         Add_str_char(delim);
 } /* add_param */
 
-#ifndef MSDOS
-#define size_name_str   100
-#define size_ctl_str    400
-#define size_vo_fo_str  500
-#define size_inv_line   1000
+#define size_name_str   255         // limits due to string managment
+#define size_ctl_str    255
+#define size_vo_fo_str  255
+#define size_inv_line   255    
 
-// the code below is flawed in that Init_str should only take byte max size and
-// repeated calls set the max length for string checks in this case to the size % 256
+// code reworked to avoid problems with string management
+// does impose some limits on the number of controls but should be ok for normal usage
 
 static void Convert_xenix_format() {
-    pointer name_str = memory;                      /* editor's name*/
-    pointer ctl_str = name_str + size_name_str;     /* the controls*/
-    pointer vo_fo_str = ctl_str + size_ctl_str;     /* vo or fo  */
-    pointer inv_line = vo_fo_str + size_vo_fo_str;  /* converted inv. line */
+    byte name_str[size_name_str + 1];               /* editor's name*/
+    byte ctl_str[size_ctl_str + 1];                 /* the controls*/
+    byte vo_fo_str[size_vo_fo_str + 1];             /* vo or fo  */
+    byte inv_line[size_inv_line+ 1];                /* converted inv. line */
+    byte *newCmdLine;
 
     /* get editor's name */
     Init_str(name_str, size_name_str);
@@ -914,6 +915,7 @@ static void Convert_xenix_format() {
         if (tmp_str[0] == 0 && delim == '-')
             /* '--' terminates controls section */
             break;
+
         arg_type = Control_type();
         if (arg_type == ctl_novo || arg_type == ctl_vo ||
             arg_type == ctl_nofo || arg_type == ctl_fo) {
@@ -944,7 +946,6 @@ static void Convert_xenix_format() {
     //exloop:
         /* read the rest of the invocation line */
     Init_str(inv_line, size_inv_line);
-    Add_str_str(name_str);                  /* editor's name */
 
     while (delim != CR && delim != LF) {
         delim = dq_get_argument(tmp_str, &excep); 
@@ -959,17 +960,24 @@ static void Convert_xenix_format() {
         else Add_str_char(delim);
     }
 
-    /* append the controls to the invocation line */
-    Add_str_str(vo_fo_str);
-    Add_str_str(ctl_str);
-    Add_str_char(CR);
+    // now create reformated cmdline
+#pragma warning(suppress:26451)
+    if ((newCmdLine = (byte *)malloc(name_str[0] + inv_line[0] + vo_fo_str[0] + ctl_str[0] + 2)) == NULL) {
+        fprintf(stderr, "out of memory\n");
+        exit(1);
+    }
+    *newCmdLine = 0;
+    strncat(newCmdLine, name_str + 1, name_str[0]);
+    strncat(newCmdLine, inv_line + 1, inv_line[0]);
+    strncat(newCmdLine, vo_fo_str + 1, vo_fo_str[0]);
+    strncat(newCmdLine, ctl_str + 1, ctl_str[0]);
+    strcat(newCmdLine, "\r");
 
-    dq_switch_buffer(&inv_line[1], &excep);
+    dq_switch_buffer(newCmdLine, &excep);
     Echeck();
 
 } /* convert_xenix_format */
 
-#endif
 
 
 
@@ -991,11 +999,9 @@ static void Convert_xenix_format() {
 static void Parse_tail() {
 
     in_invocation_line = _TRUE;
-#ifndef MSDOS
-    Echeck();
     Convert_xenix_format();
-#endif
-        delim = ' ';
+    
+    delim = ' ';
     at_eoln = _FALSE;
     tmp_str[0] = 0;
     Get_arg();
@@ -1546,7 +1552,9 @@ void Q_cmnd() {
             while (oa.more_input) {        /* MUST READ ALL OF INPUT FILE */
                 i = Forward_file();
             }
-
+#ifdef UNIX
+            Get_access_rights(oa.input_name);
+#endif
             Init_str(tmp_str, sizeof(tmp_str));
             if (ch == 'W') {        /* OUTPUT IS SPECIFIED */
                 nfile = util_file;
@@ -1686,7 +1694,10 @@ void Q_cmnd() {
                 Openi(nfile, 2);
             if (rflag)
                 Openi(in_file, 2);
-
+#ifdef UNIX
+            if (rename_done)
+                Put_access_rights(files[nfile].name);
+#endif
             Add_str_str("\x11" " has been written");
             if (tmp_str[0] > string_len)
                 tmp_str[0] = string_len;
