@@ -161,6 +161,9 @@
     <ClCompile Include="start.c" />
     <ClCompile Include="tags.c" />
     <ClCompile Include="tmpman.c" />
+    <ClCompile Include="unix.c">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="util.c" />
     <ClCompile Include="verv.c" />
     <ClCompile Include="view.c" />

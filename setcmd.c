@@ -403,6 +403,7 @@ static void Set_margin() {
 
     if (tmp_str[0] != 4 /* there are errors */) {
         Add_str_str("\x9" " margin: ");
+#pragma warning(disable:6001)
         Add_str_num(num, 10);
         Set_error(tmp_str);
     }
@@ -573,6 +574,7 @@ static void Set_tabs() {
     }
     /* complete updating the rest of the array tab_to. */
     while (lasttab <= last(tab_to)) {
+#pragma warning(suppress:26451)
         nexttab = Min(lasttab + dif, last(tab_to) + 1);
         Update(&lasttab, &nexttab);
     }

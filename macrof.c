@@ -582,13 +582,11 @@ static byte Can_add_macro() {
 /* Find an index for a case statement from a char and a char list;
    will return then length of the list if the char is not found. */
 
-byte Find_index(byte ch, pointer ch_list_p) {
-    word i;
+byte Find_index(byte ch, pointer chList) {
+    byte *s;
 
-    if ((i = findb(&ch_list_p[1], ch, ch_list_p[0])) == 0xffff)
-        return ch_list_p[0];
-    else
-        return (byte)i;
+    return (s = memchr(chList + 1, ch, chList[0])) ? (byte)(s - (chList + 1)) : chList[0];
+
 } /* find_index */
 
 

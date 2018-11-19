@@ -1,5 +1,6 @@
 #ifdef UNIX
 
+#include <stdio.h>
 #include <errno.h>
 #include <signal.h>
 #include <termios.h>
@@ -17,10 +18,11 @@ int kbhit(void) {
 
 void setup_stdin(void) {
     struct termios term;
-    tcgetattr(STDIN_FILENO, &original_term);
+    tcgetattr(0, &original_term);
     term = original_term;
     term.c_lflag &= ~(ICANON | ECHO);
-    tcsetattr(STDIN_FILENO, TCSANOW, &term);
+    tcsetattr(0, TCSANOW, &term);
+    setbuf(stdin, NULL);
 }
 
 void restore_stdin(void) {

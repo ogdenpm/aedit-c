@@ -404,8 +404,7 @@ static void Unlink_from_start(byte file_num) {
         dtemp = vf_base->blocks_on_disk * block_size;
         dq_seek(vf_base->conn, abs_mode, dtemp, &excep);
         Check();
-        fwrite(blk_p->data_bytes, 1, block_size, vf_base->conn);
-        excep = errno;
+        excep = fwrite(blk_p->data_bytes, 1, block_size, vf_base->conn) != block_size ? errno : 0;
         Check();
     }
     vf_base->blocks_on_disk++;
@@ -729,8 +728,7 @@ void Write_temp(byte file_num, pointer buf_addr) {
             dtemp = vf_base->blocks_on_disk * block_size;
             dq_seek(vf_base->conn, abs_mode, dtemp, &excep);
             Check();
-            fwrite(buf_addr, 1, block_size, vf_base->conn);
-            excep = errno;
+            excep = fwrite(buf_addr, 1, block_size, vf_base->conn) != block_size ? errno : 0;
             Check();
         }
         vf_base->blocks_on_disk++;

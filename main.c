@@ -60,7 +60,11 @@ void main(int argc, char **argv) {
 
     for (int i = 0; i < argc; i++)      // work out length of command line
         len += (int)(strlen(argv[i]) + 1);     // + 1 for space
-    cmdLine = (pointer)malloc(len + 2); // add cr, lf and null - trailing space used for cr
+#pragma warning(suppress:26451)
+    if ((cmdLine = (pointer)malloc(len + 2)) == NULL) { // add cr, lf and null - trailing space used for cr
+        fprintf(stderr, "Out of memory\n");
+        exit(1);
+    }
     strcpy(cmdLine, argv[0]);           // start of command line
     for (int i = 1; i < argc; i++) {    // add other args each preceeded by a space
         strcat(cmdLine, " ");
@@ -191,7 +195,7 @@ byte dq_get_argument(pointer argument_p, wpointer excep_p) {
 
     if (!quote)
         while (*cmdLine == ' ' || *cmdLine == '\t')
-            *cmdLine++;
+            cmdLine++;
 
     while (excep == E_OK && *cmdLine && *cmdLine != '\r') {
         if (quote) {
@@ -200,7 +204,7 @@ byte dq_get_argument(pointer argument_p, wpointer excep_p) {
                     argument_p[++cnt] = *cmdLine++;
                 else {
                     if (*cmdLine == quote)      // back up to double quote for next time
-                        *cmdLine--;
+                        cmdLine--;
                     excep = E_STRING_BUFFER;
                 }
             } else
@@ -219,7 +223,7 @@ byte dq_get_argument(pointer argument_p, wpointer excep_p) {
     *argument_p = cnt;
     if (excep == E_OK) {
         while (*cmdLine == ' ' || *cmdLine == '\t')
-            *cmdLine++;
+            cmdLine++;
         return isDelim(*cmdLine) ? *cmdLine++ : ' ';
     }
     return *cmdLine;
@@ -345,12 +349,21 @@ word ci_read(byte *buf) {
                 return 0;
         case 1:
             c = _getch();
+#if MSDOS
             if (c == 0 || c == 0xe0) {
                 escSeq = mapExtended(c, _getch());
                 continue;       // with either pick up escape sequence or retry
             }
-            else
-                *buf = c;
+#else
+            if (c == ESC) {
+                ms_sleep(10);
+                if (kbhit() == 0) {  // sole ESC
+                    escSeq = "\033OS";  // convert to PF4
+                    continue;
+                }
+            }
+#endif
+            *buf = c;
             return 1;
         default:
             return 0;

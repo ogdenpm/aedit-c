@@ -759,8 +759,7 @@ void Detach(byte fnum) {
 
 static void Close_block() {
     file_num = block_file;
-    fclose(files[block_file].conn);
-    excep = errno;
+    excep = fclose(files[block_file].conn) == 0 ? 0 : errno;
     files[block_file].conn = NULL;
     Echeck();
 } /* close_block */

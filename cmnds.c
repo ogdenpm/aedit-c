@@ -199,10 +199,8 @@ void Test_crlf() {
 */
 
 static void Ubuf_char(byte ch) {
-    if (ubuf_used < last(ubuf)) {
-        ubuf[ubuf_used] = ch;
-        ubuf_used++;
-    }
+    if (ubuf_used < last(ubuf))
+        ubuf[ubuf_used++] = ch;
 } /* ubuf_char */
 
 
@@ -265,16 +263,12 @@ static void U_restore() {
     }
     i = 0;
     while (i < ubuf_left) {            /* RESTORE LEFT PART OF LINE */
-        low_e_byte = ubuf[i];
-        oa.low_e = oa.low_e + 1;
-        i++;
+        *oa.low_e++ = ubuf[i++];;
     }
 
     i = ubuf_used;
     while (i > ubuf_left) {            /* RESTORE RIGHT PART OF LINE */
-        i--;
-        oa.high_s = oa.high_s - 1;
-        high_s_byte = ubuf[i];
+        *--oa.high_s = ubuf[--i];
     }
 } /* u_restore */
 
@@ -303,7 +297,8 @@ static void Do_delete_left() {
 
     U_setup();
     /* DELETE FIRST PART OF LINE */
-    if (oa.low_e > have[row]) oa.low_e = have[row];
+    if (oa.low_e > have[row])
+        oa.low_e = have[row];
     U_save();
     Clean_tags();                        /* CLEANUP THE TAGS */
 } /* do_delete_left */
@@ -325,7 +320,8 @@ static void Do_delete_line() {
         oa.high_s = oa.high_e - 1;
         Stop_macro();
     }
-    if (oa.low_e > have[row]) oa.low_e = have[row];
+    if (oa.low_e > have[row])
+        oa.low_e = have[row];
     Clean_tags();                        /* CLEANUP THE TAGS */
     U_save();
     u_is_line = _TRUE;
@@ -348,25 +344,12 @@ static void Do_delete_line() {
 */
 
 static void Do_delete_right() {
-    byte delete_more;
 
     U_setup();
-    delete_more = _TRUE;
-    while (delete_more) {
-        if (high_s_byte == LF) {
-            delete_more = _FALSE;
-        }
-        else if (high_s_byte == CR) {
-            oa.high_s = oa.high_s + 1;
-            if (high_s_byte == LF) {
-                oa.high_s = oa.high_s - 1;
-                delete_more = _FALSE;
-            }
-        }
-        else {
-            oa.high_s = oa.high_s + 1;
-        }
-    }
+    
+    while (oa.high_s[0] != LF && (oa.high_s[0] != CR || oa.high_s[1] != LF))
+        oa.high_s++;
+
     if (oa.high_s >= oa.high_e)
         oa.high_s = oa.high_e - 1;
     U_save();
@@ -383,8 +366,7 @@ static void Do_delete_right() {
 
 void Insert_a_char(byte ch) {
 
-    low_e_byte = ch;
-    oa.low_e = oa.low_e + 1;
+    *oa.low_e++ = ch;
 } /* insert_a_char */
 
 
@@ -458,7 +440,7 @@ static void Remove_slash() {
     if (have_slash) {            /* FLAG ON MEANS HAVE THE LF    */
         have_slash = _FALSE;
         Save_line(row);
-        oa.high_s = oa.high_s + 1;
+        oa.high_s++;
         Dont_scroll();
         Re_view();
     }
@@ -555,10 +537,13 @@ static void Move_cursor(byte ch) {
                 cursor = have[row + 1] - 2;
                 if (*cursor != CR) {
                     cursor++;
-                    if (*cursor != LF) cursor++;
+                    if (*cursor != LF)
+                        cursor++;
                 }
-                if (cursor < oa.high_s) cursor = oa.high_s;
-                if (cursor >= oa.high_e) cursor = oa.high_e - 1;
+                if (cursor < oa.high_s)
+                    cursor = oa.high_s;
+                if (cursor >= oa.high_e)
+                    cursor = oa.high_e - 1;
             }
             Re_window();
         }
@@ -593,18 +578,14 @@ static void Move_cursor(byte ch) {
             Reset_column();
         }
         else {
-            pointer tmp;
             if (count > 0) {
                 Forward_line(count);
                 if (cursor + 1 == oa.high_e) {
                     cursor = Backup_line(0, oa.low_e, _TRUE);
                     Reset_column();
                 }
-                else {
-                    tmp = cursor - 1;
-                    if (*tmp == LF)
+                else if (cursor[-1] == LF)
                         Reset_column();
-                }
             }
         }
 
@@ -665,12 +646,12 @@ static void Xx_rubout() {
     else if (xbuf_index > 0) {
         Backup_char(1, _TRUE);
         xbuf_index--;
-        oa.high_s = oa.high_s - 1;
-        high_s_byte = xbuf[xbuf_index];
+        *--oa.high_s = xbuf[xbuf_index];
     }
     else {
         /*    JUST DO A LEFT CURSOR. THIS DOES NOT CHANGE THE TEXT */
-        if (have[row] == oa.low_e) have[row] = oa.high_s;
+        if (have[row] == oa.low_e)
+            have[row] = oa.high_s;
         Move_cursor(left_code);
         Xbuf_clean();
         return;

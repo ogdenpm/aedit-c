@@ -455,22 +455,7 @@ static byte Add_input_buffer() {
                  right_code,
                  undo_code };
 
-    byte codes3[] = { 14,
-                 delete_left_code,
-                 delete_right_code,
-                 CR,
-                 delete_line_code,
-                 delete_code,
-                 left_code,
-                 right_code,
-                 home_code,
-                 undo_code,
-                 s_var_code,
-                 hexin_code,
-                 up_code,
-                 down_code,
-                 macro_exec_code };
-
+    
 
     /********************* main unit of Add_Input_Buffer **********************/
     /*BEGIN*/
