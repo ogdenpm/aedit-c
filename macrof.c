@@ -834,21 +834,6 @@ next_macro_line:
                 if (str[0] == 0) {
                     Reset_config();
                 }
-                else if (Cmp_name(str, "\x2" "S3")) {
-                    SIII_setup();
-                }
-                else if (Cmp_name(str, "\x3" "S3E")) {
-                    SIIIE_setup();
-                }
-                else if (Cmp_name(str, "\x4" "S3ET")) {
-                    SIIIET_setup();
-                }
-                else if (Cmp_name(str, "\x5" "PCDOS")) {
-                    PCDOS_setup();
-                }
-                else if (Cmp_name(str, "\x2" "S4")) {
-                    SIV_setup();
-                }
                 else if (Cmp_name(str, "\x5" "VT100")) {
                     VT100_setup();
                 }
@@ -1402,7 +1387,7 @@ static void Macro_insert() {
 static void Macro_list() {
 
     byte macros_str[] = { "\x09" " Macros: " };
-    byte message_len = config == SIV ? 40 : 60; /* length of message line w/o 'other' , 'forward' */
+    byte message_len = 60; /* length of message line w/o 'other' , 'forward' */
 
     /*!!!    CALL need_screen;   TURN OFF MACRO_SUPPRESS IF ON */
     force_writing = _TRUE;

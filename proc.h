@@ -82,11 +82,6 @@ byte Get_hexin(boolean *err_p);
 
 /*****     CONF.PLM     *****/
 void Insert_long_config(pointer new_str_p, entry_t *entry_p);
-void SIV_setup();
-void SIII_setup();
-void SIIIE_setup();
-void SIIIET_setup();
-void PCDOS_setup();
 void VT100_setup();
 void ANSI_setup();
 void Ibm_pc_setup();

@@ -160,95 +160,42 @@ void Print_line(pointer line) {
         line_size[row] = 0;
     }
     text = line + 1;
-    if (config == SIIIE) {
-        if (*(dword *)text == CHAR4(' ', ' ', ' ', ' ')) {
-            word tmp;    /* blanks counter */
 
-            tmp = skipb(text, ' ', *line);        /* find number of blanks */
-            if (tmp == 0xffff)
-                tmp = *line;
-            text = line + tmp;                    /* adjust text line length */
-            text[0] = *line - tmp;
-            if (!macro_suppress || force_writing) {
-                if (co_buffer[0] != 0)
-                    Co_flush();
-                if (in_block_mode == _FALSE) {
-                    Cocom(0x2f);
-                    in_block_mode = _TRUE;
-                }
-                Codat(0x80 | tmp);
-                /* print the rest of the line */
-                Send_block(text);
-            }
-            col = *line;
-            if (isa_text_line == _TRUE || line_size[row] > *line) {
-                if (!macro_suppress || force_writing)
-                    Codat((80 - *line) | 0x80);
-                col = 80;
-                isa_text_line = _FALSE;
-            }
-        }
-        else {
-            if (!macro_suppress || force_writing) {
-                if (co_buffer[0] != 0)
-                    Co_flush();
-                if (in_block_mode == _FALSE) {
-                    Cocom(0x2f);
-                    in_block_mode = _TRUE;
-                }
-                Send_block(line);
-            }
+    /* if we have 4 or more spaces and if we have absolute cursor addressing,
+        and if the previous line length was 0
+    */
 
-            col = *line;
+    no_region = (row == last_text_line && (config == VT100 || config == ANSI));
+    if (no_region)
+        Reset_scroll_region();
 
-            /*    CAUTION: PUT ERASE LINE MAY HAVE TO WRITE BLANKS TO CLEAR THE LINE */
-            if (isa_text_line == _TRUE || line_size[row] > *line) {
-                if (!macro_suppress || force_writing)
-                    Codat((80 - *line) | 0x80);
-                col = 80;
-                isa_text_line = _FALSE;
-            }
-        }
+    if (*(dword *)text == CHAR4(' ', ' ', ' ', ' ')
+        && line_size[row] == 0 && output_codes[goto_out_code].code[0] != 0) {
+
+        word tmp;    /* blanks counter */
+
+        tmp = skipb(text, ' ', *line);        /* find number of blanks */
+        if (tmp == 0xffff)
+            tmp = *line;
+        text = line + tmp;                    /* adjust text line length */
+        text[0] = *line - tmp;
+        Put_goto((byte)tmp, row);            /* adjust cursor position */
+        Print_string(text);        /* print the rest of the line */
+        col = *line;
     }
     else {
-
-        /* if we have 4 or more spaces and if we have absolute cursor addressing,
-           and if the previous line length was 0
-        */
-
-        no_region = (row == last_text_line && (config == VT100 || config == ANSI));
-        if (no_region)
-            Reset_scroll_region();
-
-        if (*(dword *)text == CHAR4(' ', ' ', ' ', ' ')
-            && line_size[row] == 0 && output_codes[goto_out_code].code[0] != 0) {
-
-            word tmp;    /* blanks counter */
-
-            tmp = skipb(text, ' ', *line);        /* find number of blanks */
-            if (tmp == 0xffff)
-                tmp = *line;
-            text = line + tmp;                    /* adjust text line length */
-            text[0] = *line - tmp;
-            Put_goto((byte)tmp, row);            /* adjust cursor position */
-            Print_string(text);        /* print the rest of the line */
-            col = *line;
-        }
-        else {
-            Print_string(line);
-            col = *line;
-            if (line_size[row] > *line)
-                Put_erase_line();
-        }
-
-        /*    CAUTION: PUT ERASE LINE MAY HAVE TO WRITE BLANKS TO CLEAR THE LINE */
-
-        line_size[current_row] = *line;
-
-        if (no_region)
-            Put_scroll_region(first_text_line, last_text_line);
-
+        Print_string(line);
+        col = *line;
+        if (line_size[row] > *line)
+            Put_erase_line();
     }
+
+    /*    CAUTION: PUT ERASE LINE MAY HAVE TO WRITE BLANKS TO CLEAR THE LINE */
+
+    line_size[current_row] = *line;
+
+    if (no_region)
+        Put_scroll_region(first_text_line, last_text_line);
 
     Adjust_for_column_80();
 
@@ -267,10 +214,7 @@ static void Add_to_message(pointer addstr) {
     byte i;
 
     i = addstr[0];                    /* LENGTH OF ADDITIONAL STRING    */
-    if (config == SIV)
-        max_message_len = 60;
-    else
-        max_message_len = 80;
+    max_message_len = 80;
     if (i + next_message[0] > max_message_len)
         i = max_message_len - next_message[0];
 
@@ -312,14 +256,8 @@ static void Print_message_and_stay(pointer line) {
     Add_to_message(msg);
 
     /*    USE THE NORMAL '!' CONVERTION IF LINE IS TOO LONG    */
-    if (config == SIV) {
-        if (next_message[0] >= 60)
-            next_message[60] = '!';
-    }
-    else {
-        if (next_message[0] >= 80)
-            next_message[80] = '!';
-    }
+    if (next_message[0] >= 80)
+        next_message[80] = '!';
 
     if (batch_mode) {
         if (line[0] > 5) { /* don't print COUNT while in batch mode */

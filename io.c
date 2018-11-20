@@ -87,40 +87,29 @@ static void Flush() {
     if (co_buffer[0] == 0)
         return;
 
-    if (config == SIIIE) {
-        Send_block(&co_buffer[0]);
-    }
-    else if (config == SIIIEO) {
-        for (i = 1; i <= co_buffer[0]; i++) {
-            Port_co(co_buffer[i]);
-        }
-    }
-    else {
-
-        if (delay_after_each_char != 0) {
-            if (delay_after_each_char <= 0x8000) {
-                for (i = 1; i <= co_buffer[0]; i++) {
-                    co_write(&co_buffer[i], 1);
-                    if (delay_after_each_char != 0xffff)  /* ffff - no delay */
-                        ms_sleep(delay_after_each_char / 10);
-                }
-            }
-            else {
-                index = 1;
-                len = Min(delay_after_each_char - 0x8000, co_buffer[0] - index + 1);
-                while (len != 0) {
-                    co_write(&co_buffer[index], len);
-                    ms_sleep(1);
-                    index = index + len;
-                    len = Min(delay_after_each_char - 0x8000, co_buffer[0] - index + 1);
-                }
+    if (delay_after_each_char != 0) {
+        if (delay_after_each_char <= 0x8000) {
+            for (i = 1; i <= co_buffer[0]; i++) {
+                co_write(&co_buffer[i], 1);
+                if (delay_after_each_char != 0xffff)  /* ffff - no delay */
+                    ms_sleep(delay_after_each_char / 10);
             }
         }
         else {
-            co_write(&co_buffer[1], co_buffer[0]);
+            index = 1;
+            len = Min(delay_after_each_char - 0x8000, co_buffer[0] - index + 1);
+            while (len != 0) {
+                co_write(&co_buffer[index], len);
+                ms_sleep(1);
+                index = index + len;
+                len = Min(delay_after_each_char - 0x8000, co_buffer[0] - index + 1);
+            }
         }
-
     }
+    else {
+        co_write(&co_buffer[1], co_buffer[0]);
+    }
+
     co_buffer[0] = 0;
 
 } /* flush */
@@ -340,11 +329,9 @@ void Check_for_keys() {
         return;
     }
 
-    if (config != SIIIE && config != SIIIEO) {
-        if (!poll_mode) {
-            set_ci_mode(3); // =set to polling
-            poll_mode = _TRUE;
-        }
+    if (!poll_mode) {
+        set_ci_mode(3); // =set to polling
+        poll_mode = _TRUE;
     }
 
     //    get_next_character:
@@ -354,23 +341,16 @@ void Check_for_keys() {
 
         numin = 0;
 
-        if (config == SIIIE || config == SIIIEO) {
-            if (Port_csts()) {
-                _char = Port_ci();
-                numin = 1;
-            }
+        if (have_control_c) {
+            _char = CONTROLC;
+            numin = 1;
+            have_control_c = _FALSE;
         }
         else {
-            if (have_control_c) {
-                _char = CONTROLC;
-                numin = 1;
-                have_control_c = _FALSE;
-            }
-            else {
-                _char = 0;
-                numin = (byte)ci_read(&_char);
-            }
+            _char = 0;
+            numin = (byte)ci_read(&_char);
         }
+
         if (numin == 0)
             return;
 
@@ -430,12 +410,7 @@ void Set_cursor(byte new_val) {
 
 #define flag_start	0x5a80
 
-
-    if (config != SIIIE)
-        return;    /* protection */
-    set_string[4] = new_val;
-    Send_block(set_string);
-
+    return;    /* protection */
 } /* set_cursor */
 
 
@@ -548,25 +523,14 @@ byte Ci() {
     while (_TRUE) {
         if (cur_ci == valid_ci) {        /* type-ahead buffer empty */
             Input_expected(); /* print "input-expected" (-??-)  message */
-            if (config != SIIIE && config != SIIIEO) {
-                if (poll_mode && batch_mode == _FALSE) {
-                    set_ci_mode(1);     // transparent non polling
-                    poll_mode = _FALSE;
-                }
+            if (poll_mode && batch_mode == _FALSE) {
+                set_ci_mode(1);     // transparent non polling
+                poll_mode = _FALSE;
             }
 
             _char = 0;
 
-            if (config == SIIIE || config == SIIIEO) {
-                if (config == SIIIE) {
-                    Set_cursor(cursor_type);    /* restore user's cursor */
-                }
-                _char = Port_ci();
-                numin = 1;
-            }
-            else {
-                numin = (byte)ci_read(&_char);
-            }
+            numin = (byte)ci_read(&_char);
             _char = Convert_if_cc(_char); /** RR Jan 16 **/
             if (have_control_c) {
                 _char = CONTROLC;
@@ -597,8 +561,6 @@ byte Ci() {
         /* MUST TEST FOR READING A CONTROLC BECAUSE OF AN ISIS BUG
            ASSOCIATED WITH A CONSOLE REDIRECTED TO :I1:   --old comment-- */
 
-        if (config == SIIIE)
-            Set_cursor(0x40);    /* turn cursor off */
         return _char;
 }
 } /* ci */
@@ -799,15 +761,13 @@ word Read(byte fnum) {
     Working();
 
     file_num = fnum;
-    if (config != SIIIE)
-        Check_for_keys();
+    Check_for_keys();
     numin = (word)fread(oa.low_e, 1, oa.block_size, files[fnum].conn);
     if (excep = ferror(files[fnum].conn) ? errno : 0) {
         Echeck();
         numin = 0;
     }
-    if (config != SIIIE)
-        Check_for_keys();
+    Check_for_keys();
     oa.low_e = oa.low_e + numin;
     return numin;
 } /* read */
@@ -837,11 +797,9 @@ static void Rewind(byte fnum) {
 */
 
 static void Write_wk1() {
-    if (config != SIIIE)
-        Check_for_keys();
+    Check_for_keys();
     Write_temp(oa.wk1_conn, oa.low_s);
-    if (config != SIIIE)
-        Check_for_keys();
+    Check_for_keys();
 } /* write_wk1 */
 
 
@@ -853,11 +811,9 @@ static void Write_wk1() {
 */
 static void Write_wk2(pointer start) {
 
-    if (config != SIIIE)
-        Check_for_keys();
+    Check_for_keys();
     Write_temp(oa.wk2_conn, start);
-    if (config != SIIIE)
-        Check_for_keys();
+    Check_for_keys();
 } /* write_wk2 */
 
 
@@ -1032,13 +988,11 @@ word Macro_file_read() {
 
     file_num = mac_file;
     Check_window(0);
-    if (config != SIIIE)
-        Check_for_keys();
+    Check_for_keys();
     numin = (byte)fread(oa.low_e, 1, window_minimum, files[mac_file].conn);
     excep = ferror(files[mac_file].conn) ? errno : 0;
     Echeck();
-    if (config != SIIIE)
-        Check_for_keys();
+    Check_for_keys();
     return numin;
 
 } /* macro_file_read */
@@ -1209,12 +1163,10 @@ void Write(byte nfile, pointer buf, word len) {
 
         Working();
 
-        if (config != SIIIE)
-            Check_for_keys();
+        Check_for_keys();
         excep = fwrite(buf, 1, len, files[nfile].conn) != len ? errno : 0;
         Echeck();
-        if (config != SIIIE)
-            Check_for_keys();
+        Check_for_keys();
     }
 } /* write */
 
@@ -1386,8 +1338,7 @@ void Read_block_file() {
                 numin = read_low;
             Check_window(numin);
             if (numin > 0) {
-                if (config != SIIIE)
-                    Check_for_keys();
+                Check_for_keys();
                 numin = (byte)fread(oa.low_e, 1, numin, files[block_file].conn);
                 excep = ferror(files[block_file].conn) ? errno : 0;
                 if (excep == 0)
@@ -1396,8 +1347,7 @@ void Read_block_file() {
                     Echeck();
                     return;
                 }
-                if (config != SIIIE)
-                    Check_for_keys();
+                Check_for_keys();
             }
             /*    DECREMENT 4 BYTE INTEGER IS READ_LOW AND READ_HIGH    */
             if (read_low < numin)
