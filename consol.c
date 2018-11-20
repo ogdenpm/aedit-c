@@ -220,7 +220,7 @@ static void Add_to_message(pointer addstr) {
 
     /*    ADD THE NEW TEXT    */
     memcpy(&next_message[next_message[0]] + 1, addstr + 1, i);
-    next_message[0] = next_message[0] + i;
+    next_message[0] += i;
 } /* add_to_message */
 
 
@@ -249,7 +249,7 @@ static void Print_message_and_stay(pointer line) {
 
     /*    ADD THE ACTUAL VOLITILE PART OF MESSAGE TO STRING    */
     /* create a local copy to avoid changing read only strings*/
-    memcpy(msg, line, *line + 1);
+    memcpy(msg, line, (size_t)*line + 1);
     for (i = 1; i <= msg[0]; i++) {
         msg[i] = Printable(msg[i]);
     }

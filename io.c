@@ -128,6 +128,7 @@ void Co(byte byt) {
 
     if (co_buffer[0] == last(co_buffer))
         Co_flush();
+#pragma warning(suppress:6386)
     co_buffer[++co_buffer[0]] = byt;
 
 } /* co */
@@ -548,21 +549,13 @@ byte Ci() {
                 Quit_exit(5);
             }
 #endif
-        }
-        else {    /* get a _char from the buffer */
-            _char = ci_buff[cur_ci];
-            cur_ci++;
-            numin = 1;
-        }
+        } else    /* get a _char from the buffer */
+            _char = ci_buff[cur_ci++];
 
         if (_char == CONTROLC)
             cc_flag = _TRUE;
-
-        /* MUST TEST FOR READING A CONTROLC BECAUSE OF AN ISIS BUG
-           ASSOCIATED WITH A CONSOLE REDIRECTED TO :I1:   --old comment-- */
-
         return _char;
-}
+    }
 } /* ci */
 
 

@@ -337,7 +337,7 @@ void G_cmnd() {
         } while (nxt_addr.bp <= block_buffer + in_block_buffer);
 
         i *= count;
-        if (i < last_text_line - was_row && count < 23 && i < 23 && i < 7) {
+        if (i < last_text_line - was_row && count < 23 && i < 23) {
             nxt_addr.w = was_row;
             if (cursor == save_addr && was_row > 0) {
                 nxt_addr.w = was_row - 1;

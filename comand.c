@@ -100,9 +100,6 @@ start_over:
 
     ch = Ci();
 
-    /*    IF SERIES IV MUST 'NORMALIZE' FUNCTION KEYS AS THEY HAVE DIFFERENT
-        VALUES WHEN SHIFT OR CONTROL KEYS ARE HELD DOWN    */
-
     if (strip_parity)
         ch &= 0x7f;     /* STRIP PARITY */
 
@@ -129,9 +126,11 @@ start_over:
                     havePrefix = true;
             }
         }
-        if (havePrefix && matched.length != 4)
-            ch = Ci();                          // try rest of prefix
-        else if (matched.length != 1) {         // at least one char was previously matched so error
+        if (havePrefix && matched.length != 4) {
+            ch = Ci();                             // try rest of prefix
+            if (strip_parity)
+                ch &= 0x7f;
+        } else if (matched.length != 1) {         // at least one char was previously matched so error
             AeditBeep();
             goto start_over;
         } else
@@ -809,10 +808,6 @@ byte Input_command(pointer prompt) {
 
     if (command != home_code && !(last_main_cmd == home_code && command == 'A'))
         last_move_command = 0; /* undefined */
-
-    /* SEE IF CHARACTER IS A FUNCTION KEY. IF SO, TRANSLATE IT TO
-       COMMAND LETTER*/
-       /* IF IN LAST POSITION THEN ASSUMED TO BE A TAB COMMAND    */
 
     return command;
 
