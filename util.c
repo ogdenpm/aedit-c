@@ -109,10 +109,10 @@ pointer Print_number(dword d_number, byte b_width, byte base) {
 
 
 pointer string_p;
-byte max_string_length;
+int max_string_length;
 
 
-void Init_str(pointer str_p, byte len) {
+void Init_str(pointer str_p, int len) {
     string_p = str_p;
     max_string_length = len - 1; /* Substract leading byte. */
     string_p[0] = 0;
@@ -120,7 +120,7 @@ void Init_str(pointer str_p, byte len) {
 
 
 
-void Reuse_str(pointer str_p, byte len) {
+void Reuse_str(pointer str_p, int len) {
     /* Initialize, but do not cancel current contents. */
 
     string_p = str_p;
@@ -169,9 +169,8 @@ void Init_scan(pointer str_p) {
 
 
 void Swb() {
-    while (*scan_p == ' ' || *scan_p == TAB) {
+    while (*scan_p == ' ' || *scan_p == TAB)
         scan_p++;
-    }
 } /* swb */
 
 

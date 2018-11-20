@@ -32,15 +32,6 @@
 byte memory[memory_leng];
 
 
-/*
- * Begin iRMX II.4 Fix, Part 1 of 8, 12/28/88
- * Feature addition allowing aedit to capture CLI terminal name and then read
- * :config:termcap for initial terminal configurations based on this name.
- */
- /*
-  * End iRMX II.4 Fix, Part 1 of 8
-  */
-
 word memory_size;
 word other_buffer_size;
 word block_size;
@@ -58,9 +49,6 @@ byte first_o_command = { _TRUE };
 byte s_init[string_len_plus_1] = { 0 };
 
 boolean explicit_macro_file = { _FALSE };
-
-
-// #eject
 
 
 /**************************************************************************/
@@ -846,7 +834,8 @@ static void Get_input_file_name() {
         }
     }
     /* VO and FO are not allowed with a null filename */
-    if (oa.input_name[0] == 0) oa.file_disposition = keep_file;
+    if (oa.input_name[0] == 0)
+        oa.file_disposition = keep_file;
 
 } /* get_input_file_name */
 
@@ -883,19 +872,19 @@ static void Add_param() {
         Add_str_char(delim);
 } /* add_param */
 
-#define size_name_str   255         // limits due to string managment
-#define size_ctl_str    255
-#define size_vo_fo_str  255
-#define size_inv_line   255    
+#define size_name_str   256         // limits due to string managment, max string is one char less
+#define size_ctl_str    256
+#define size_vo_fo_str  256
+#define size_inv_line   256    
 
 // code reworked to avoid problems with string management
 // does impose some limits on the number of controls but should be ok for normal usage
 
 static void Convert_xenix_format() {
-    byte name_str[size_name_str + 1];               /* editor's name*/
-    byte ctl_str[size_ctl_str + 1];                 /* the controls*/
-    byte vo_fo_str[size_vo_fo_str + 1];             /* vo or fo  */
-    byte inv_line[size_inv_line+ 1];                /* converted inv. line */
+    byte name_str[size_name_str];               /* editor's name*/
+    byte ctl_str[size_ctl_str];                 /* the controls*/
+    byte vo_fo_str[size_vo_fo_str];             /* vo or fo  */
+    byte inv_line[size_inv_line];                /* converted inv. line */
     byte *newCmdLine;
 
     /* get editor's name */

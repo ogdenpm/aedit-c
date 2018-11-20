@@ -337,6 +337,7 @@ char *mapExtended(byte c1, byte c2) {   // ignore 0 / 0xe0 prefix
 word ci_read(byte *buf) {
     byte c;
     static char *escSeq = "";
+    static char escCode[5];
 
     while (1) {
         if (*escSeq) {
@@ -350,21 +351,26 @@ word ci_read(byte *buf) {
         case 1:
             c = _getch();
 #if MSDOS
-            if (c == 0 || c == 0xe0) {
-                escSeq = mapExtended(c, _getch());
-                continue;       // with either pick up escape sequence or retry
-            }
+            if (c == 0 || c == 0xe0)
+                escSeq = mapExtended(c, _getch()); // with either pick up escape sequence or retry
+            else if (c == ESC) {                   // windows reads keyboard directly so ESC will be a single key press
 #else
-            if (c == ESC) {
-                ms_sleep(10);
-                if (kbhit() == 0) {  // sole ESC
-                    escSeq = "\033OS";  // convert to PF4
-                    continue;
-                }
-            }
+            if (c == ESC) {                       // unix may have escape sequence or a single escape key
+                ms_sleep(5);                      // pause a little to see if any more of a sequence
+                if (kbhit() == 0)
 #endif
-            *buf = c;
-            return 1;
+                {  // sole ESC
+                    if (0 < input_codes[esc_code - first_code].code[0] && input_codes[esc_code - first_code].code[0] <= 4)
+                        toCstr(escCode, input_codes[esc_code - first_code].code);       // replace with sequence for esc_code
+                    else
+                        strcpy(escCode, "\033OS");      // default to PF4
+                    escSeq = escCode;
+                }
+            } else {
+                *buf = c;
+                return 1;
+            }
+            break;
         default:
             return 0;
         }

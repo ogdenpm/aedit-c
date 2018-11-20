@@ -324,11 +324,11 @@ void Insert_long_config(pointer new_str_p, entry_t *entry_p) {
 static void Update_config_table(pointer table_p, word table_len, word entry_size, pointer new_data_p) {
     byte i;
 
-    memset(table_p, 0, table_len * entry_size);
+    memset(table_p, 0, (size_t)table_len * entry_size);
     for (i = 0; i <= table_len - 1; i++) {
-        memcpy(table_p, new_data_p, new_data_p[0] + 1);
+        memcpy(table_p, new_data_p, (size_t)new_data_p[0] + 1);
         table_p += entry_size;
-        new_data_p += new_data_p[0] + 1;
+        new_data_p += (size_t)new_data_p[0] + 1;
     }
 
 } /* update_config_table */
