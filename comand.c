@@ -103,24 +103,8 @@ start_over:
     /*    IF SERIES IV MUST 'NORMALIZE' FUNCTION KEYS AS THEY HAVE DIFFERENT
         VALUES WHEN SHIFT OR CONTROL KEYS ARE HELD DOWN    */
 
-    if (config == SIV) {
-        if (ch >= 0x80) {
-            ch = ch & 0x9f;
-
-            /* NEED KLUDGE CODE SO THAT BOTH THE DELETE CHAR AND CONTROL F
-               KEYS ARE ALIASED. SAME FOR DELETE LINE AND CONTROL Z.    */
-            if (ch == 0x80) {
-                ch = delete_code;
-            }
-            else if (ch == 0x82) {
-                ch = delete_line_code;
-            }
-        }
-    }
-    else {
-        if (strip_parity)
-            ch &= 0x7f;     /* STRIP PARITY */
-    }
+    if (strip_parity)
+        ch &= 0x7f;     /* STRIP PARITY */
 
     if (Have_controlc())
         return CONTROLC;
@@ -801,7 +785,6 @@ static void Collect_count() {
 /*                                                                        */
 /**************************************************************************/
 byte Input_command(pointer prompt) {
-    byte ch, i;
 
     /*BEGIN*/
     Init_str(tmp_str, sizeof(tmp_str));
@@ -830,22 +813,7 @@ byte Input_command(pointer prompt) {
     /* SEE IF CHARACTER IS A FUNCTION KEY. IF SO, TRANSLATE IT TO
        COMMAND LETTER*/
        /* IF IN LAST POSITION THEN ASSUMED TO BE A TAB COMMAND    */
-    if (config == SIV) {
-        i = command - 0x90;                    /* FUNCTION KEYS ARE 90H TO 97H */
-        if (i < 8) {
-            i = i * 10 + 2;
-            ch = prompt[i];
-            if ((i == 72) && (ch == '-')) {
-                command = TAB;    /*--more-- prompt*/
-            }
-            else if ((ch != ' ')) {
-                command = ch;
-            }
-            else {
-                command = illegal_code;
-            }
-        }
-    }
+
     return command;
 
 } /* input_command */

@@ -86,116 +86,6 @@ code_t input_codes[17];
 
 code_t output_codes[17];
 
-byte SIV_input_codes[] = {
-    1, 0x87,        /* UP */
-    1, 0x88,        /* DOWN */
-    1, 0x89,        /* LEFT */
-    1, 0x8a,        /* RIGHT */
-    1, 0x81,        /* HOME */
-    1, 0x80,        /* BOTH 80H AND CONTROL F WORK AS CHAR DELETE */
-    1, ESC,        /* ESC */
-    1, 0x82,        /* BOTH 82H AND CONTROL Z ARE DELETE LINE */
-    1, 0x18,        /* CONTROL X IS DELETE LEFT */
-    1, 0x1,         /* CONTROL A IS DELETE RIGHT */
-    1, 0x15,        /* CONTROL U IS UNDO */
-    1, 0x7f,        /* RUBOUT */
-    1, 0x5,        /* CONTROL-E IS DEFAULT FOR MACRO EXECUTE */
-    1, 0x16,        /* CONTROL-V IS STRING VARIABLE */
-    1, 0xe,        /* CONTROL-N IS NUMERIC VARIABLE */
-    1, 0x12,        /* CONTROL-R IS HEX IN CODE */
-    0 };           /* IGNORE_CODE ; NOTHING IS IGNORED */
-
-byte SIV_output_codes[] = {
-    2, ESC, 'A',     /* UP */
-    2, ESC, 'B',     /* DOWN */
-    1, 8,           /* LEFT */
-    2, ESC, 'C',     /* RIGHT */
-    2, ESC, 'H',     /* HOME */
-    1, CR,          /* BACK */
-    2, ESC, 'J',     /* ERASE REST OF SCREEN */
-    2, ESC, 0x45,     /* ERASE ENTIRE SCREEN */
-    2, ESC, 'K',     /* ERASE REST OF LINE */
-    3, CR, ESC, 'K',  /* ERASE ENTIRE LINE */
-    0,             /* REVERSE SCROLL */
-    2, ESC, 'Y',     /* LEAD IN FOR ADDRESS CURSOR */
-    1, ' ',         /* OFFSET FOR ADDRESS CURSOR */
-    0,             /* DELETE LINE CODE */
-    3, ESC, 'L', 0x50, /* REVERSE VIDEO CODE */
-    3, ESC, 'L', 0x40, /* NORMAL VIDEO CODE */
-    1, 0x20 };        /* DEFAULT BLANKOUT CODE */
-
-
-
-
-
-
-byte SIII_input_codes[] = {
-    1, 0x1e,        /* UP */
-    1, 0x1c,        /* DOWN */
-    1, 0x1f,        /* LEFT */
-    1, 0x14,        /* RIGHT */
-    1, 0x1d,        /* HOME */
-    1, 0x6,        /* CONTROL F IS DELETE */
-    1, ESC,        /* ESC */
-    1, 0x1a,        /* CONTROL Z IS DELETE LINE */
-    1, 0x18,        /* CONTROL X IS DELETE LEFT */
-    1, 0x1,        /* CONTROL A IS DELETE RIGHT */
-    1, 0x15,        /* CONTROL U IS UNDO */
-    1, 0x7f,        /* RUBOUT */
-    1, 0x5,        /* CONTROL-E IS DEFAULT */
-    1, 0x16,        /* CONTROL-V IS STRING VARIABLE */
-    1, 0xe,        /* CONTROL-N IS NUMERIC VARIABLE */
-    1, 0x12,        /* CONTROL-R IS HEX IN CODE */
-    0 };           /* IGNORE_CODE ; NOTHING IS IGNORED */
-
-byte SIII_output_codes[] = {
-    1, 0x1e,        /* UP */
-    1, 0x1c,        /* DOWN */
-    1, 0x1f,        /* LEFT */
-    1, 0x14,        /* RIGHT */
-    1, 0x1d,        /* HOME */
-    1, CR,         /* BACK */
-    2, ESC, 0x4a,    /* ERASE REST OF SCREEN */
-    2, ESC, 0x45,    /* ERASE ENTIRE SCREEN */
-    0,            /* ERASE REST OF LINE */
-    2, ESC, 0x4b,    /* ERASE ENTIRE LINE */
-    0,            /* REVERSE SCROLL */
-    0,            /* LEAD IN FOR ADDRESS CURSOR */
-    1, 0,          /* OFFSET FOR ADDRESS CURSOR */
-    0,            /* DELETE LINE CODE */
-    0,            /* REVERSE VIDEO CODE */
-    0,            /* NORMAL VIDEO CODE */
-    1, 0x20 };       /* DEFAULT BLANKOUT CODE */
-
-
-
-
-
-
-byte SIIIE_output_codes[] = {
-    1, 0x1e,         /* UP */
-    1, 0x1c,         /* DOWN */
-    1, 0x1f,         /* LEFT */
-    1, 0x14,         /* RIGHT */
-    1, 0x1d,         /* HOME */
-    1, CR,          /* BACK */
-    2, ESC, 0x53,     /* ERASE REST OF SCREEN */
-    2, ESC, 0x45,     /* ERASE ENTIRE SCREEN */
-    2, ESC, 0x52,     /* ERASE REST OF LINE */
-    2, ESC, 0x4b,     /* ERASE ENTIRE LINE */
-    4, ESC, 0x57, 0x60, 0x3f, /* REVERSE SCROLL */
-    2, ESC, 0x59,     /* LEAD IN FOR ADDRESS CURSOR */
-    1, 0x20,         /* OFFSET FOR ADDRESS CURSOR */
-    4, ESC, 0x57, 0x3f, 0x60, /* DELETE LINE CODE */
-    3, ESC, 'L', 0x90, /* REVERSE VIDEO CODE */
-    3, ESC, 'L', 0x80, /* NORMAL VIDEO CODE */
-    1, 0x20 };        /* DEFAULT BLANKOUT CODE */
-
-
-
-
-
-
 byte VT100_input_codes[] = {
     3, LEAD, 0x41,   /* UP */
     3, LEAD, 0x42,   /* DOWN */
@@ -339,14 +229,6 @@ static void Update_config_table(pointer table_p, word table_len, word entry_size
 void Close_ioc() {
 
     Co_flush();
-    if (config == SIIIE) {
-        if (in_block_mode == _TRUE) {
-            Codat(0xff);   /* end block mode */
-            in_block_mode = _FALSE;
-        }
-        Set_cursor(cursor_type);    /* restore cursor */
-    }
-    if (config == SIIIE || config == SIIIEO) Disable_ioc_io(); /* enable keyboard interrupts */
     config = UNKNOWN;
 
 } /* close_ioc */
@@ -410,130 +292,7 @@ void Reset_config() {
 } /* reset_config */
 
 
-
-
-
-
-
-void SIV_setup() {
-
-    Close_ioc();
-
-    config = SIV;
-
-    /* Insert defaults into the config tables. */
-    Update_config_table((pointer)input_codes, length(input_codes),
-        sizeof(input_codes[0]), SIV_input_codes);
-    Update_config_table((pointer)output_codes, length(output_codes),
-        sizeof(output_codes[0]), SIV_output_codes);
-
-    memcpy(print_as, "?\x1\x2\x3\x4\x5\x6??\t\n\xb\xc \xe\xf"
-        "\x10\x11\x12\x13\x14\x15\x16\x16\x18\x19\x1a?\x1c\x1d\x1e\x1f", 32);
-
-    /* AV=25; */
-    if (!window_present) {
-        window.prompt_line = prompt_line = 24;
-        window.message_line = message_line = 23;
-        window.last_text_line = last_text_line = 22;
-    }
-
-    wrapper = _FALSE;  /* AW=F;  The terminal doesn't wrap lines. */
-
-    visible_attributes = _TRUE;
-    /* AI=F;  screen attributes take up one space on the screen */
-    character_attributes = _FALSE;
-    /* AC=F;  attributes apply to a field */
-
-    first_coordinate = row_first; /* AX=R; */
-
-} /* SIV_setup */
-
-
-
-void SIII_setup() {
-
-    Close_ioc();
-
-    config = SIII;
-
-    /* Insert defaults into the config tables. */
-    Update_config_table((pointer)input_codes, length(input_codes),
-        sizeof(input_codes[0]), SIII_input_codes);
-    Update_config_table((pointer)output_codes, length(output_codes),
-        sizeof(output_codes[0]), SIII_output_codes);
-
-    memcpy(print_as, first_32_chars, 32);
-
-    /* AV=25; */
-    if (!window_present) {
-        window.prompt_line = prompt_line = 24;
-        window.message_line = message_line = 23;
-        window.last_text_line = last_text_line = 22;
-    }
-
-    wrapper = _TRUE;  /* AW=T;  The terminal wraps lines. */
-
-    visible_attributes = _TRUE;
-    /* AI=F;  screen attributes take up one space on the screen */
-    character_attributes = _FALSE;
-    /* AC=F;  attributes apply to a field */
-
-    first_coordinate = col_first; /* AX=C; */
-
-} /* SIII_setup */
-
-
-
-void SIIIET_setup() {
-
-    SIII_setup();
-
-    config = SIIIET;
-
-    Update_config_table((pointer)output_codes, length(output_codes),
-        sizeof(output_codes[0]), SIIIE_output_codes);
-    first_coordinate = row_first;
-
-} /* SIIIET_setup */
-
-
-
-
-void SIIIE_setup() {
-
-    SIIIET_setup();
-
-
-} /* SIIIE_setup */
-
-
-
-
 boolean dos_system = { _FALSE };
-
-
-void PCDOS_setup() {
-
-    SIII_setup();
-
-    wrapper = _FALSE;
-    visible_attributes = _FALSE;
-    character_attributes = _TRUE;
-    strip_parity = _FALSE;
-
-    memcpy(input_codes[rubout_code - first_code].code, "\x1\b\0\0\0",  5);
-
-    memcpy(output_codes[reverse_scroll_out_code].code, "\x2" ESCSTR "L\0\0", 5);
-    memcpy(output_codes[delete_out_code].code, "\x2" ESCSTR "I\0\0", 5);
-    memcpy(output_codes[goto_out_code].code, "\x2" ESCSTR "G\0\0", 5);
-    memcpy(output_codes[reverse_video_code].code, "\x3" ESCSTR "Mp\0", 5);
-    memcpy(output_codes[normal_video_code].code, "\x3" ESCSTR "M\x7\0", 5);
-
-    dos_system = _TRUE;
-
-} /* PCDOS_setup */
-
-
 
 void VT100_setup() {
 
@@ -567,11 +326,6 @@ void VT100_setup() {
 
 } /* VT100_setup */
 
-
-
-
-
-
 void ANSI_setup() {
 
     VT100_setup();
@@ -585,18 +339,10 @@ void ANSI_setup() {
 
 } /* ANSI_setup */
 
-
-
 void Setup_terminal() {
 
     dq_get_system_id(tmp_str, &excep);
-    if (Cmp_name(tmp_str, "\xa" "SERIES-III")) {
-        SIII_setup();
-    }
-    else if (cmpb(&tmp_str[1], "DOS", 3) == 0xffff) {
-        PCDOS_setup();
-    }
-    else if (cmpb(&tmp_str[1], "WIN", 3) == 0xffff) {
+    if (cmpb(&tmp_str[1], "WIN", 3) == 0xffff) {
         ANSI_setup();
         dos_system = _TRUE;
     }

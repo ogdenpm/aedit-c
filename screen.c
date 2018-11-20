@@ -111,8 +111,6 @@ void Put_home() {
         Actual_goto(0, 0);
         return;
     }
-    if (config == SIV)
-        Select_partition(0);
     Print_code(output_codes[home_out_code].code);
     row = col = 0;
     Delay(home_out_code);
@@ -127,8 +125,7 @@ static void Put_back() {
 void Put_erase_screen() {        /* erase rest of screen function */
     Print_code(output_codes[erase_screen_out_code].code);
     Delay(erase_screen_out_code);
-    if (config != SIV)
-        Gone_prompt();
+    Gone_prompt();
 } /* put_erase_screen */
 
 void Put_erase_entire_screen() {    /* clear screen */
@@ -136,8 +133,7 @@ void Put_erase_entire_screen() {    /* clear screen */
     Print_code(output_codes[erase_entire_screen_out_code].code);
     Delay(erase_entire_screen_out_code);
     Put_home();
-    if (config != SIV)
-        Gone_prompt();
+    Gone_prompt();
 } /* put_erase_entire_screen */
 
 void Put_erase_line() {
@@ -210,7 +206,6 @@ void Put_reverse_video() {
 
 static void Actual_goto(byte goto_col, byte goto_row) {
     byte need_row;
-    byte max_row;
 
     /*    IF SERIES IV THEN MUST EXPLICITLY JUMP BETWEEN PARTITIONS    */
 
@@ -218,18 +213,6 @@ static void Actual_goto(byte goto_col, byte goto_row) {
         return;
 
     need_row = goto_row;
-    if (config == SIV) {
-        max_row = last_text_line;
-        if (window_num == 0)
-            max_row = window.last_text_line;
-        if (goto_row > max_row) {
-            if (row != goto_row)
-                Select_partition(goto_row - max_row);
-            need_row = 0;
-        }
-        else if (row > max_row)
-            Select_partition(0);
-    }
 
     if (config == VT100 || config == ANSI) {
         byte trow, tcol;
@@ -351,10 +334,7 @@ void Put_normal_video_end() {
 */
 void Put_start_row(byte new_row) {
 
-    if (config == SIV && new_row > last_text_line) {
-        Actual_goto(0, new_row);
-    }
-    else if (new_row == row + 1) {
+    if (new_row == row + 1) {
         Put_down();
     }
     else if (new_row == row) {    /*NULL*/
@@ -400,15 +380,6 @@ void Put_clear_all() {
     else if (output_codes[erase_screen_out_code].code[0] != 0 &&
         (!window_present || window_num == 1)) {
         Put_erase_screen();
-        if (config == SIV) {
-            Select_partition(1);    /* GOTO MESSAGE LINE    */
-            Put_erase_screen();
-            Select_partition(2);    /* GOTO PROMPT LINE    */
-            Put_erase_screen();
-            row = prompt_line;
-            if (first_text_line == 0) Put_home();
-            else Put_start_row(first_text_line);
-        }
 
         /*    ELSE ERASE LINE BY LINE    */
     }
@@ -436,43 +407,21 @@ void Put_clear_all() {
 void Put_clear_all_text() {
     wbyte i;
 
-    if (config == SIV)
-        Select_partition(0);
-
     if (output_codes[erase_entire_line_out_code].code[0] == 0 &&
         output_codes[erase_line_out_code].code[0] == 0)
         Put_clear_all();
     else {
-        if (config == SIIIE) {
-            Co_flush();
-            Cocom(0xf);
-            Codat(first_text_line);
-            Codat(0);
-        }
-        else {
-            if (first_text_line == 0) Put_home();
+        if (first_text_line == 0) Put_home();
             else Put_start_row(first_text_line);
-        }
+
         for (i = first_text_line; i <= last_text_line - 1; i++) {
-            if (config == SIIIE) {
-                Codat(0x80 + 80);
-            }
-            else {
-                Put_erase_entire_line();
-                Put_down();
-            }
+            Put_erase_entire_line();
+            Put_down();
             have[i] = 0;
             line_size[i] = 0;
         }
-        if (config == SIIIE) {
-            Codat(0x80 + 80);
-            Codat(0xff);
-            row = last_text_line + 1;
-            col = 0;
-        }
-        else {
-            Put_erase_entire_line();
-        }
+
+        Put_erase_entire_line();
 
         line_size[last_text_line] = 0;
         have[last_text_line] = 0;
@@ -490,25 +439,12 @@ void Put_clear_all_text() {
 static void Scroll_partial_up(byte num) {
     byte i;
 
-    if (config == SIIIE || config == SIIIET || config == SIIIEO) {
-        scroll_str[3] = last_text_line; /* line to insert */
-        scroll_str[4] = 0x60;            /* delete line cursor is on */
-        for (i = 1; i <= num; i++) {
-            Print_string(scroll_str);
-            /*p        CALL put_start_row(last_text_line);*/
-
-            /* IF num<>1 THEN */ Delay(delete_out_code);
-
-        }
+    for (i = 1; i <= num; i++) {
+        Put_delete();
     }
-    else {
-        for (i = 1; i <= num; i++) {
-            Put_delete();
-        }
-        Put_start_row(last_text_line - num + 1);
-        for (i = 1; i <= num; i++) {
-            Put_insert();
-        }
+    Put_start_row(last_text_line - num + 1);
+    for (i = 1; i <= num; i++) {
+        Put_insert();
     }
 } /* scroll_partial_up */
 
@@ -525,28 +461,14 @@ static void Scroll_partial_down(byte insert_row, byte num) {
 
     byte i;
 
-    if (config == SIIIE || config == SIIIET || config == SIIIEO) {
-        /* we have advance IOC insert/delete function, so use it */
-        scroll_str[3] = insert_row;
-        scroll_str[4] = last_text_line;
-        for (i = 1; i <= num; i++) {
-            Print_string(scroll_str);
-            Put_start_row(insert_row);
-            /* IF num<>1 THEN */
-            Delay(delete_out_code);
-
-        }
+    /*    MUST FIRST DELETE THE LAST LINE SO PROMPT IS PRESERVED    */
+    Put_start_row(last_text_line - num + 1);
+    for (i = 1; i <= num; i++) {
+        Put_delete();
     }
-    else {
-        /*    MUST FIRST DELETE THE LAST LINE SO PROMPT IS PRESERVED    */
-        Put_start_row(last_text_line - num + 1);
-        for (i = 1; i <= num; i++) {
-            Put_delete();
-        }
-        Put_start_row(insert_row);
-        for (i = 1; i <= num; i++) {
-            Put_insert();
-        }
+    Put_start_row(insert_row);
+    for (i = 1; i <= num; i++) {
+        Put_insert();
     }
 
 } /* scroll_partial_down */
@@ -645,25 +567,16 @@ void Put_scroll(byte num_lines) {
         /*
             IF window_present=FALSE THENDO; |* the old code *|
         */
-        if (config == SIV) {
-            Put_start_row(last_text_line);
-            for (i = 1; i <= num_lines; i++) {
-                Print_string("\x1\n");
-            }
-            line_size[last_text_line] = 0;
+        Put_start_row(prompt_line);
+        for (i = 1; i <= num_lines; i++) {
+            Print_string("\x1\n");
+            Delay(down_out_code);
+            line_size[last_text_line] = line_size[message_line];
+            line_size[message_line] = line_size[prompt_line];
+            line_size[prompt_line] = 0;
         }
-        else {
-            Put_start_row(prompt_line);
-            for (i = 1; i <= num_lines; i++) {
-                Print_string("\x1\n");
-                Delay(down_out_code);
-                line_size[last_text_line] = line_size[message_line];
-                line_size[message_line] = line_size[prompt_line];
-                line_size[prompt_line] = 0;
-            }
-            Put_up();
-            Put_up();
-        }
+        Put_up();
+        Put_up();
     }
     else {    /* use insert/delete line functions to partial scroll */
      /* line_size is adjusted in put_delete_line */

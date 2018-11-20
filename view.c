@@ -567,11 +567,6 @@ pointer Print_text_line(pointer line) {
 
     pointer next_ln;
     byte image[81];
-    if (config == SIIIE) {
-        if (!macro_suppress || force_writing) {
-            return Unfold_to_screen(line);
-        }
-    }
     next_ln = Unfold(line, image);
     if (!macro_suppress || force_writing)
         Print_line(image);
@@ -608,12 +603,10 @@ void Re_write(pointer start) {
             if (output_codes[delete_out_code].code[0] != 0) {
                 if (!(dx >= last_text_line || (macro_suppress && !force_writing))) {
                     if ((temp = findp(&have[dx + 1], start, last_text_line - dx)) != 0xffff) {
-                        if (++temp < 7 || config != SIIIE) {
-                            Put_delete_line((byte)temp);
-                            count += temp - 1;
-                            start = have[temp + dx];
-                            continue;
-                        }
+                        Put_delete_line((byte)temp);
+                        count += temp - 1;
+                        start = have[temp + dx];
+                        continue;
                     }
                 }
             }
@@ -663,7 +656,7 @@ static boolean Scroll(byte num_line) {
 
     first_of_new = message_line - num_line;
 
-    if (config != SIV && !window_present)
+    if (!window_present)
         /* In aedit-86 2.0 it was     : AND NOT clean_scroll instead of : AND NOT window_present=TRUE */
         Kill_prompt_and_message();  /* BLANK MSG AND PROMPT LINES */
 
@@ -676,31 +669,16 @@ static boolean Scroll(byte num_line) {
             have[i] = have[i + num_line];
             line_size[i] = line_size[i + num_line];
         } else {
-            if (config != SIIIE) {
-                Put_scroll(1);
-                have[i] = next_start;
-                next_start = Print_text_line(next_start);
-                line_size[i] = line_size[last_text_line];
-            } else {
-                i = 254;
-            }
-
-        }
-    }
-
-    if (config == SIIIE) {
-        Put_scroll(message_line - first_of_new);
-        for (i = first_of_new; i <= last_text_line; i++) {
+            Put_scroll(1);
             have[i] = next_start;
-            Put_start_row((byte)i);
-            isa_text_line = _TRUE;
             next_start = Print_text_line(next_start);
+            line_size[i] = line_size[last_text_line];
         }
     }
 
     have[message_line] = next_start;
 
-    if (config != SIV && !window_present)
+    if (!window_present)
         Print_last_prompt_and_msg(_TRUE); /* only small prompt */
 
     Position_in_text();
@@ -736,7 +714,7 @@ static boolean Reverse_scroll(byte num_line) {
     if (start > oa.high_s)
         return _FALSE;
 
-    if (config != SIV && !window_present)
+    if (!window_present)
         Kill_prompt_and_message();  /* BLANK MSG AND PROMPT LINES */
 
     /* FOR EVERY NEW LINE, BACKUP THE DISPLAY AND WRITE THE NEW LINE */
@@ -752,29 +730,14 @@ static boolean Reverse_scroll(byte num_line) {
             count++;
             Put_reverse_scroll();
             line_size[j] = 0;
-            if (config != SIIIE) {
-                Print_text_line(have[j] = Backup_line(1, have[j + 1], _FALSE));
-                line_size[j] = line_size[0];
-            }
+            Print_text_line(have[j] = Backup_line(1, have[j + 1], _FALSE));
+            line_size[j] = line_size[0];
         }
         j--;
     }
 
-    if (config == SIIIE) {
-        start = Backup_line(count, start, _FALSE);
-
-        count--;
-        for (j = 0; j <= count; j++) {
-            Put_start_row(j + first_text_line);
-            isa_text_line = _TRUE;
-            have[j + first_text_line] = start;
-            start = Print_text_line(start);
-        }
-    }
-
-
     /* RESTORE MSG AND PROMPT LINES (only small prompt)*/
-    if (config != SIV && !window_present) {
+    if (!window_present) {
         //       Kill_prompt_and_message();      // re-clear due to bug in MS Delete Line
         Print_last_prompt_and_msg(_TRUE);
     }

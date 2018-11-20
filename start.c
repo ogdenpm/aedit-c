@@ -1351,8 +1351,6 @@ void Quit_exit(byte status) {
     /* CALCULATE LINE IN WHICH TO LEAVE CURSOR */
     lastl = Max(prompt_line, window.prompt_line);
     /* ON SERIES IV DO NOT LEAVE USER STUCK IN THE PROMPT LINE    */
-    if (config == SIV)
-        lastl = lastl - 2;
     Put_start_row(lastl);        /* GOTO FINAL LINE */
     Put_erase_entire_line();        /* WIPE IT OUT    */
     Put_start_row(lastl);        /* GOTO FINAL LINE */

@@ -94,11 +94,6 @@
 /*****     LIT CONF     *****/
 
 #define UNKNOWN	0
-#define SIV	1
-#define SIII	2
-#define SIIIE	3
-#define SIIIEO	4
-#define SIIIET	5
 #define ANSI	6
 #define VT100	7
 #define IBMPC	8

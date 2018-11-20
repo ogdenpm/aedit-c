@@ -6,7 +6,7 @@ OBJS =	aeddum.o aedit.o aedplm.o block.o calc.o cctrap.o cmnds.o comand.o \
 	   	conf.o consol.o find.o io.o macrof.o main.o pub.o screen.o setcmd.o \
 		start.o tags.o tmpman.o unix.o util.o verv.o view.o words.o
 
-CFLAGS = -O2 -I.
+CFLAGS = -O2 -I. -Wunused-variable
 DEFS = -DUNIX
 
 .PHONY: all
