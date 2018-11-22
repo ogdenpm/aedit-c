@@ -9,6 +9,7 @@
 *********************************************************************/
 
 #include "oscompat.h"
+#include <stdlib.h>
 #include "lit.h"
 #include "type.h"
 #include "data.h"
@@ -205,37 +206,22 @@ void Put_reverse_video() {
 
 
 static void Actual_goto(byte goto_col, byte goto_row) {
-    byte need_row;
 
     /*    IF SERIES IV THEN MUST EXPLICITLY JUMP BETWEEN PARTITIONS    */
 
     if (row == goto_row && col == goto_col)
         return;
 
-    need_row = goto_row;
-
-    if (config == VT100 || config == ANSI) {
-        byte trow, tcol;
-        trow = need_row + 1;
-        tcol = goto_col + 1;
-        str[0] = 0;
-        if (trow > 9)
-            str[++str[0]] = (trow / 10) + '0';
-        str[++str[0]] = (trow % 10) + '0';
-        str[++str[0]] = ';';
-        if (tcol > 9)
-            str[++str[0]] = (tcol / 10) + '0';
-        str[++str[0]] = (tcol % 10) + '0';
-        str[++str[0]] = 'H';
-    }
+    if (config == VT100 || config == ANSI)
+        str[0] = (byte)sprintf(str + 1, "%d;%dH", goto_row + 1, goto_col + 1);
     else if (first_coordinate == col_first) {
         str[0] = 2;
         str[1] = goto_col + output_codes[offset_index].code[1]; /* COLUMN NUMBER */
-        str[2] = need_row + output_codes[offset_index].code[1]; /* ROW NUMBER */
+        str[2] = goto_row + output_codes[offset_index].code[1]; /* ROW NUMBER */
     }
     else { /* row_first */
         str[0] = 2;
-        str[1] = need_row + output_codes[offset_index].code[1]; /* ROW NUMBER */
+        str[1] = goto_row + output_codes[offset_index].code[1]; /* ROW NUMBER */
         str[2] = goto_col + output_codes[offset_index].code[1]; /* COLUMN NUMBER */
     }
     Print_code(output_codes[goto_out_code].code);    /* LEAD IN CODE */
@@ -616,25 +602,7 @@ void Put_scroll_region(byte first_row, byte last_row) {
     byte str[10];
 
     if (config == VT100) {
-
-        first_row++;
-        last_row++;
-
-        str[0] = 2;
-        str[1] = ESC;
-        str[2] = '[';
-
-        if (first_row > 9)
-            str[++str[0]] = (first_row / 10) + '0';
-        str[++str[0]] = (first_row % 10) + '0';
-
-        str[++str[0]] = ';';
-
-        if (last_row > 9)
-            str[++str[0]] = (last_row / 10) + '0';
-        str[++str[0]] = (last_row % 10) + '0';
-
-        str[++str[0]] = 'r';
+        str[0] = sprintf(str + 1, "\033[%d;%dr", first_row + 1, last_row + 1);
 
         Print_code("\x2" ESCSTR "7");      /* save cursor */
         Print_code(str);              /* VT100 set scroll region */

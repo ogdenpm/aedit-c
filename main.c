@@ -366,7 +366,8 @@ word ci_read(byte *buf) {
                     else
                         strcpy(escCode, "\033OS");      // default to PF4
                     escSeq = escCode;
-                }
+                } else
+                    escSeq = "\033";
             } else {
                 *buf = c;
                 return 1;

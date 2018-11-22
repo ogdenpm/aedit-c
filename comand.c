@@ -948,7 +948,8 @@ static byte Input_l(pointer prompt_p, pointer prev_string_p) {
         edit_stat.reediting = _TRUE;
     if (!edit_stat.reediting)
         Print_message(ed_mess);
-    else Print_message(&null_str);
+    else
+        Print_message(&null_str);
 
     edit_stat.last_cursor_key = 0; /* 0 = undefined */
     in_input_line = _TRUE;
@@ -965,7 +966,7 @@ static byte Input_l(pointer prompt_p, pointer prev_string_p) {
         Add_str_special(input_buffer);
         if (edit_stat.mode == from_find || edit_stat.mode == from_replace)
             Add_str_char('"');
-        if ((ch == CR) || (ch == esc_code) || (ch == rubout_code)) {
+        if (ch == CR || ch == esc_code || ch == rubout_code) {
             Print_input_line();
             Co_flush();
             if (edit_stat.reediting) {

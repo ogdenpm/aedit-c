@@ -704,6 +704,6 @@ void K_cmnd() {        /* kill the windowing */
     prompt_line = last_text_line + 2;
 
     V_cmnd();
-    Print_message (&null_str);
+    Print_message ("");
 
 } /* k_cmnd */
