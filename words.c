@@ -591,7 +591,7 @@ static void Switch_windows() {
         oa.toff[ed_tagw] = oa.toff[ed_taga];
     } else {
         oa.tblock[ed_tagw] = saver1;
-        oa.toff[ed_tagw] = saver2;
+        oa.toff[ed_tagw].bp = saver2;
     }
 
 

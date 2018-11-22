@@ -4,6 +4,7 @@
 #include <conio.h>
 #include <windows.h>
 #include <consoleapi.h>
+#include <synchapi.h>
 #endif
 #include <memory.h>
 #include <stdio.h>
@@ -380,7 +381,7 @@ word ci_read(byte *buf) {
 
 #ifdef MSDOS
 void ms_sleep(unsigned n) {
-    // to implement
+    Sleep(n);
 }
 #endif
 

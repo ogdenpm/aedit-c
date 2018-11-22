@@ -33,20 +33,20 @@ void Movmem(pointer from_word, pointer to_word, word len) {
 
     /*    CORRECT TAGS IF NECESSARY    */
 
-    saver = oa.toff[ed_tagw];
+    saver = oa.toff[ed_tagw].bp;
 
     last_moved = from_word + len - 1;
     distance = (int)(to_word - from_word);
     for (i = 1; i <= num_tag; i++) {
-        if (oa.tblock[i] == oa.wk1_blocks && oa.toff[i] >= from_word
-            && oa.toff[i] <= last_moved)
-            oa.toff[i] += distance;
+        if (oa.tblock[i] == oa.wk1_blocks && oa.toff[i].bp >= from_word
+            && oa.toff[i].bp <= last_moved)
+            oa.toff[i].bp += distance;
     }
 
     /* PRESEVE the setting of ed_tagw if we have called clean tags
        while not in the same file that that tag is reserved for */
     if (in_other != w_in_other)
-        oa.toff[ed_tagw] = saver;
+        oa.toff[ed_tagw].bp = saver;
 
 
     /*    AND THE POINTER TO THE SAVED LINE IMAGE    */

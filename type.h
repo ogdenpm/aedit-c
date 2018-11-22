@@ -12,15 +12,18 @@ typedef word *wpointer;
 typedef dword *dpointer;
 typedef byte logical;
 typedef byte boolean;
-typedef byte *address;
 #pragma pack(push, 1)
 typedef union {
     pointer bp;
     wpointer wp;
     word w;
-} _WORD;
+    dword dw;
+} address_t;
 
-
+typedef union {
+    pointer bp;
+    word offset;
+} toff_t;
 
 /*              NOTE
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -74,7 +77,7 @@ typedef struct _oa {
        A TAG CAN NEVER REFER TO A LOCATION IN THE SOURCE FILE
      */
     word  tblock[9];
-    pointer toff[9];
+    toff_t toff[9];
     connection  in_conn;          /* THE CONNECTION NUMBER TO THE INPUT FILE.NOTE THAT THIS IS NOT UPDATED
                                SO ONLY THE VALUE IN STRUCTURE OB IS CORRECT.*/
     byte  dirty;            /* TRUE IF FILE HAS BEEN CHANGED */

@@ -47,7 +47,7 @@ static void Delete_blocks(byte wk1_or_wk2, word ndelete) {
             if (oa.tblock[i] >= oa.wk1_blocks - ndelete)
                 if (oa.tblock[i] < oa.wk1_blocks) {
                     oa.tblock[i] = oa.wk1_blocks - ndelete;
-                    oa.toff[i] = oa.high_s;
+                    oa.toff[i].bp = oa.high_s;
                 }
                 else oa.tblock[i] = oa.tblock[i] - ndelete;
         }
@@ -61,7 +61,7 @@ static void Delete_blocks(byte wk1_or_wk2, word ndelete) {
             if (oa.tblock[i] > oa.wk1_blocks)
                 if (oa.tblock[i] <= oa.wk1_blocks + ndelete) {
                     oa.tblock[i] = oa.wk1_blocks;
-                    oa.toff[i] = oa.high_s;
+                    oa.toff[i].bp = oa.high_s;
                 }
                 else oa.tblock[i] = oa.tblock[i] - ndelete;
         }
@@ -82,7 +82,7 @@ static void Delete_blocks(byte wk1_or_wk2, word ndelete) {
 void Set_tag(byte tagn, pointer in_mem) {
 
     oa.tblock[tagn] = oa.wk1_blocks;
-    oa.toff[tagn] = in_mem;
+    oa.toff[tagn].bp = in_mem;
 } /* set_tag */
 
 
@@ -104,7 +104,7 @@ void Jump_tag(byte tagn) {
         else
             Forward_file();
     }
-    cursor = oa.toff[tagn];
+    cursor = oa.toff[tagn].bp;
     Re_window();
 } /* jump_tag */
 
@@ -126,17 +126,17 @@ void Clean_tags() {
     wbyte i;
     pointer saver;
 
-    saver = oa.toff[ed_tagw];
+    saver = oa.toff[ed_tagw].bp;
 
     for (i = 1; i <= num_tag; i++) {
-        if (oa.tblock[i] == oa.wk1_blocks && oa.toff[i] >= oa.low_e && oa.toff[i] < oa.high_s)
-            oa.toff[i] = oa.high_s;
+        if (oa.tblock[i] == oa.wk1_blocks && oa.toff[i].bp >= oa.low_e && oa.toff[i].bp < oa.high_s)
+            oa.toff[i].bp = oa.high_s;
     }
 
     /* PRESEVE the setting of ed_tagw if we have called clean tags
        while not in the same file that that tag is reserved for */
     if (in_other != w_in_other)
-        oa.toff[ed_tagw] = saver;
+        oa.toff[ed_tagw].bp = saver;
 
 } /* clean_tags */
 
@@ -156,7 +156,7 @@ void Delete_to_tag(byte tagn) {
         Clean_tags();
         Delete_blocks(wk1, oa.wk1_blocks - dest_block - 1);
         i = Backup_file();
-        oa.low_e = oa.toff[tagn];                /* DELETE PART OF LAST BLOCK */
+        oa.low_e = oa.toff[tagn].bp;                /* DELETE PART OF LAST BLOCK */
         Clean_tags();
         V_cmnd();                        /* BUILD SCREEN FROM SCRATCH */
         return;
@@ -172,7 +172,7 @@ void Delete_to_tag(byte tagn) {
 
     /*    NOW HAVE THE TAG IN MEMORY */
 
-    dest_off = oa.toff[tagn];
+    dest_off = oa.toff[tagn].bp;
     if (dest_off <= oa.low_e) {            /* AT END OF DELETE RANGE */
         if (have[first_text_line] <= dest_off) {
             i = row;                            /* SEE IF STILL ON THE SCREEN */

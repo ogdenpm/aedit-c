@@ -58,8 +58,8 @@ static byte Saved_in_block() {
 
     if (oa.tblock[ed_tagi] == oa.wk1_blocks) {    /* TAG MUST BE IN CURRENT
                                                     BLOCK */
-        if (oa.toff[ed_tagi] >= oa.high_s) {    /* TAG IS IN HIGH PART */
-            len = (word)(oa.toff[ed_tagi] - oa.high_s);
+        if (oa.toff[ed_tagi].bp >= oa.high_s) {    /* TAG IS IN HIGH PART */
+            len = (word)(oa.toff[ed_tagi].bp - oa.high_s);
             if (len <= block_buffer_size) {
                 in_block_buffer = len;
                 memcpy(block_buffer, oa.high_s, len); /* MOVE TEXT
@@ -69,10 +69,10 @@ static byte Saved_in_block() {
         }
         else {                                /* TAG IS IN LOW PART
                                                     OF TEXT */
-            len = (word)(oa.low_e - oa.toff[ed_tagi]);
+            len = (word)(oa.low_e - oa.toff[ed_tagi].bp);
             if (len <= block_buffer_size) {
                 in_block_buffer = len;
-                memcpy(block_buffer, oa.toff[ed_tagi], len);
+                memcpy(block_buffer, oa.toff[ed_tagi].bp, len);
                 /* MOVE TEXT TO BUFFER */
                 return _TRUE;
             }
@@ -96,7 +96,7 @@ static void Block_delete() {
 
     /*    MUST REMEMBER IF DELETING DOWN SO CLEANUP CAN FIND THE STARTING @    */
 
-    delete_down = oa.tblock[ed_tagi] == oa.wk1_blocks && oa.toff[ed_tagi] < oa.high_s;
+    delete_down = oa.tblock[ed_tagi] == oa.wk1_blocks && oa.toff[ed_tagi].bp < oa.high_s;
 
     if (Saved_in_block() == _FALSE) {
         Rebuild_screen();      /* BRING BACK DISPLAY IF SUPPRESSED */
@@ -117,7 +117,7 @@ static void Block_delete() {
 
     Delete_to_tag(ed_tagi);
     if (delete_down)
-        oa.toff[ed_tagi] = oa.low_e;
+        oa.toff[ed_tagi].bp = oa.low_e;
     b_is_done = _TRUE;
     return;
 } /* block_delete */
@@ -195,10 +195,10 @@ static void Draw_first_at_sign(byte ch) {
 
     /* IF ON SCREEN, FIND THE ROW CONTAINING THE STARTING @    */
     if (oa.tblock[ed_tagi] == oa.wk1_blocks        &&
-        oa.toff[ed_tagi] >= have[first_text_line] &&
-        oa.toff[ed_tagi] < have[message_line]) {
+        oa.toff[ed_tagi].bp >= have[first_text_line] &&
+        oa.toff[ed_tagi].bp < have[message_line]) {
         if (!first_at_sign_is_here) {
-            for (i = first_text_line + 1; have[i] <= oa.toff[ed_tagi]; i++)
+            for (i = first_text_line + 1; have[i] <= oa.toff[ed_tagi].bp; i++)
                 ;
             Put_goto(block_col, i - 1);
             Text_co(ch);
@@ -273,7 +273,7 @@ void B_cmnd() {
         if (command == 'A' && last_cmd != 'F' && last_cmd != '-')
             command = last_cmd;
         Text_co(On_screen());    /* REMOVE CURRENT '@' */
-        if (oa.high_s == oa.toff[ed_tagi] && col == block_col)
+        if (oa.high_s == oa.toff[ed_tagi].bp && col == block_col)
             /* mark again with @ if we are at the first @ (tagi)
                and not on dead_blank */
             Text_co('@');
@@ -316,7 +316,7 @@ void G_cmnd() {
     word was_saved_from;
     byte was_row;
     byte i;
-    _WORD nxt_addr;      // ?? should i be a word
+    address_t nxt_addr;      // ?? should i be a word
     pointer save_addr;
 
     if (infinite) return;

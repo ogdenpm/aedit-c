@@ -840,7 +840,7 @@ static void Expand_window() {
     word saver2;
     pointer limit, saver;
 
-    saver = oa.toff[ed_tagw];
+    saver = oa.toff[ed_tagw].bp;
     saver2 = oa.tblock[ed_tagw];
     if ((oa.low_e - oa.low_s) > (oa.high_e - oa.high_s)) {    /* CHOOSE LARGER */
 
@@ -859,8 +859,8 @@ static void Expand_window() {
             Text_lost();
             for (i = 1; i <= num_tag; i++) {            /* FIX ANY TAGS THAT WERE THROWN AWAY*/
                 if (oa.tblock[i] == oa.wk1_blocks)
-                    if (oa.toff[i] < limit)
-                        oa.toff[i] = limit;
+                    if (oa.toff[i].bp < limit)
+                        oa.toff[i].bp = limit;
             }
             /* if we just spilled the file, then the other window might not
                have valid data on it, so mark it dirty
@@ -875,13 +875,13 @@ static void Expand_window() {
 
             for (i = 1; i <= num_tag; i++) {                /* FIX ANY TAGS THAT WERE PAGED OUT */
                 if (oa.tblock[i] == oa.wk1_blocks) {
-                    if (oa.toff[i] < limit)
-                        oa.toff[i] = (pointer)(oa.toff[i] -oa.low_s);
+                    if (oa.toff[i].bp < limit)
+                        oa.toff[i].offset = (word)(oa.toff[i].bp - oa.low_s);
                     else
-                        oa.tblock[i] = oa.tblock[i] + 1;
+                        oa.tblock[i]++;
                 }
                 else if (oa.tblock[i] > oa.wk1_blocks && oa.tblock[i] != 0xffff)
-                    oa.tblock[i] = oa.tblock[i] + 1;
+                    oa.tblock[i]++;
             }
             oa.wk1_blocks = oa.wk1_blocks + 1;
         }
@@ -911,8 +911,8 @@ static void Expand_window() {
 
             /*    FIX TAGS THAT WILL BE DISCARDED    */
             for (i = 1; i <= num_tag; i++) {
-                if (oa.toff[i] >= limit)
-                    oa.toff[i] = limit - 1;
+                if (oa.toff[i].bp >= limit)
+                    oa.toff[i].bp = limit - 1;
             }
             /* if we just spilled the file, then the other window might not
                have valid data on it, so mark it dirty
@@ -927,9 +927,9 @@ static void Expand_window() {
                 if (oa.tblock[i] > oa.wk1_blocks && oa.tblock[i] != 0xffff)
                     oa.tblock[i] = oa.tblock[i] + 1;
                 else if (oa.tblock[i] == oa.wk1_blocks)
-                    if (oa.toff[i] >= limit) {
-                        oa.toff[i] = (pointer)(oa.toff[i] -limit);
-                        oa.tblock[i] = oa.tblock[i] + 1;
+                    if (oa.toff[i].bp >= limit) {
+                        oa.toff[i].offset = (word)(oa.toff[i].bp -limit);
+                        oa.tblock[i]++;
                     }
             }
             oa.wk2_blocks = oa.wk2_blocks + 1;
@@ -943,7 +943,7 @@ static void Expand_window() {
     }
 
     if (in_other != w_in_other) {
-        oa.toff[ed_tagw] = saver;
+        oa.toff[ed_tagw].bp = saver;
         oa.tblock[ed_tagw] = saver2;
     }
     else {
@@ -1016,7 +1016,7 @@ byte Backup_file() {
     pointer saver;
     word saver2;
 
-    saver = oa.toff[ed_tagw];
+    saver = oa.toff[ed_tagw].bp;
     saver2 = oa.tblock[ed_tagw];
 
     if (oa.wk1_blocks == 0)
@@ -1031,12 +1031,12 @@ byte Backup_file() {
         if (oa.tblock[i] >= oa.wk1_blocks && oa.tblock[i] != 0xffff)
             oa.tblock[i] = oa.tblock[i] - 1;
         else if (oa.tblock[i] == oa.wk1_blocks - 1)
-            oa.toff[i] = ((word)oa.toff[i]) + oa.low_s;
+            oa.toff[i].bp = oa.toff[i].offset + oa.low_s;
     }
     oa.wk1_blocks = oa.wk1_blocks - 1;            /* ADJUST WK1 BLOCK COUNT */
 
     if (in_other != w_in_other) {
-        oa.toff[ed_tagw] = saver;
+        oa.toff[ed_tagw].bp = saver;
         oa.tblock[ed_tagw] = saver2;
     }
 
@@ -1073,7 +1073,7 @@ byte Forward_file() {
     pointer saver;
     word saver2;
 
-    saver = oa.toff[ed_tagw];
+    saver = oa.toff[ed_tagw].bp;
     saver2 = oa.tblock[ed_tagw];
 
     if (Can_forward_file()) {            /* WE HAVE HAVE MORE TEXT */
@@ -1084,8 +1084,8 @@ byte Forward_file() {
 
     /*    MOVE TAGS DOWN SO READ WILL PUT DATA ABOVE TAGS    */
         for (i = 1; i <= num_tag; i++) {
-            if (oa.tblock[i] == oa.wk1_blocks && oa.toff[i] == oa.high_s)
-                oa.toff[i] = oa.low_e;
+            if (oa.tblock[i] == oa.wk1_blocks && oa.toff[i].bp == oa.high_s)
+                oa.toff[i].bp = oa.low_e;
         }
         for (i = first_text_line; i <= message_line; i++) {
             if (have[i] == oa.high_s)
@@ -1100,7 +1100,7 @@ byte Forward_file() {
                 if (oa.tblock[i] > oa.wk1_blocks && oa.tblock[i] != 0xffff) {
                     oa.tblock[i] = oa.tblock[i] - 1;
                     if (oa.tblock[i] == oa.wk1_blocks)
-                        oa.toff[i] = ((word)oa.toff[i]) + cursor;
+                        oa.toff[i].bp = oa.toff[i].offset + cursor;
                 }
             }
             oa.wk2_blocks = oa.wk2_blocks - 1;        /* ADJUST WK1 BLOCK COUNT */
@@ -1128,7 +1128,7 @@ byte Forward_file() {
         Re_window();                        /* LEAVE WITH NEW BLOCK AFTER
                                             AFTER WINDOW */
         if (in_other != w_in_other) {
-            oa.toff[ed_tagw] = saver;
+            oa.toff[ed_tagw].bp = saver;
             oa.tblock[ed_tagw] = saver2;
         }
         else {
@@ -1193,7 +1193,7 @@ static void Write_to_tagi(byte nfile, byte do_delete) {
     Set_tag(ed_taga, oa.high_s);    /* JUMP TO START OF AREA */
     target_tag = ed_tagi;                    /* AND SET TARGET_TAG TO HIGH TAG */
     if (oa.tblock[ed_tagi] < oa.wk1_blocks ||
-        (oa.tblock[ed_tagi] == oa.wk1_blocks && oa.toff[ed_tagi] < oa.low_e)) {
+        (oa.tblock[ed_tagi] == oa.wk1_blocks && oa.toff[ed_tagi].bp < oa.low_e)) {
         Jump_tagi();
         target_tag = ed_taga;
     }
@@ -1221,7 +1221,7 @@ static void Write_to_tagi(byte nfile, byte do_delete) {
 
     /*    WRITE REST OF TEXT  BUT NOT THE EOF MARKER */
 
-    size_out = (word)(oa.toff[target_tag] - oa.high_s);
+    size_out = (word)(oa.toff[target_tag].bp - oa.high_s);
     Write(nfile, oa.high_s, size_out);
     if (nfile == block_file) {
         if (block_low + size_out > 0xffff)

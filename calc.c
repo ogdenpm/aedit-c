@@ -156,7 +156,7 @@ pointer Get_n_var(byte radix, boolean add_minus) {
     byte ch;
     byte len;
     byte i;
-    address p;
+    pointer p;
     dword dtemp;
 
     Print_message("\x6" "<FETN>");
@@ -309,12 +309,14 @@ byte char_type_tbl[] = {
 
 static byte Char_type(byte ch) {
 
-    if (ch > sizeof(char_type_tbl)) return 0; /* error */
+    if (ch >= sizeof(char_type_tbl))        // PMO fixed boundary index
+        return 0; /* error */
     return char_type_tbl[ch] & 0xf;
 }
 
 static byte Char_subtype(byte ch) {
-    if (ch > sizeof(char_type_tbl)) return 0; /* error */
+    if (ch >= sizeof(char_type_tbl))        // PMO fixed boundary index
+        return 0; /* error */
     return (byte)(char_type_tbl[ch] >> 4);
 }
 
@@ -397,7 +399,7 @@ static dword Convert_time_and_date(bool date) {     // if date true then get dat
     Get block number of a tag and its in the block, and return
     the offset of that tag from the file beginning.
 *******************************************************************/
-static dword Get_offset(word block_num, pointer offset_in_block) {
+static dword Get_offset(word block_num, toff_t offset_in_block) {
 
     dword offset;
 
@@ -406,20 +408,20 @@ static dword Get_offset(word block_num, pointer offset_in_block) {
 
     if (block_num > oa.wk1_blocks) {
         offset = (block_num - oa.wk1_blocks - 1) * oa.block_size +
-            ((word)offset_in_block) + Size_of_text_in_memory() +
+            offset_in_block.offset + Size_of_text_in_memory() +
             oa.wk1_blocks * oa.block_size;
     }
     else if (block_num == oa.wk1_blocks) {
-        if (offset_in_block >= oa.high_s) {
-            offset = (dword)(offset_in_block - oa.high_s + oa.low_e - oa.low_s);
+        if (offset_in_block.bp >= oa.high_s) {
+            offset = (word)(offset_in_block.bp - oa.high_s + oa.low_e - oa.low_s);
         }
         else {
-            offset = (dword)(offset_in_block - oa.low_s);
+            offset = (dword)(offset_in_block.bp - oa.low_s);
         }
         offset = offset + oa.wk1_blocks * oa.block_size;
     }
     else {
-        offset = block_num * oa.block_size + (word)offset_in_block;
+        offset = block_num * oa.block_size + offset_in_block.offset;
     }
     return offset;
 
@@ -465,14 +467,10 @@ static byte Real_pos() {
 
 
 static boolean Is_a_system_variable() {
-    wpointer ac;
-
+    // code modified as variable len and name may not be in contiguous memory
     for (var_index = 0; var_index <= last(variables); var_index++) {
-        ac = (wpointer)variables[var_index].name;
-        if (*(wpointer)tok_ptr == *ac) { /* fast check */
-            if (cmpb(tok_ptr, (pointer)ac, variables[var_index].len) == 0xffff)
-                return _TRUE;
-        }
+        if (variables[var_index].len == tok_ptr[0] && memcmp(variables[var_index].name, tok_ptr + 1, tok_ptr[0]) == 0)
+            return _TRUE;
     }
     return _FALSE;
 } /* is_a_system_variable */
@@ -483,7 +481,7 @@ static boolean Is_a_system_variable() {
 static dword System_variable() {
     byte c, i;
 
-    tok_ptr = tok_ptr + variables[var_index].len;
+    tok_ptr += variables[var_index].len;
     switch (var_index) {
     case 0: return Real_pos();  /* COL */
     case 1: /* ROW */
@@ -492,7 +490,7 @@ static dword System_variable() {
         if (oa.high_s >= have[first_text_line] && oa.high_s < have[message_line]) {
             for (i = first_text_line + 1; oa.high_s >= have[i]; i++)
                 ;
-            return first_text_line + i - 1;
+            return first_text_line + i - 1;         //PMO this looks odd, I suspect it should be i - 1
         }
         return 0;
     case 2: return lstfnd ? ~0 : 0; /* LSTFND */
@@ -511,7 +509,10 @@ static dword System_variable() {
     case 9:	return Look_ahead(1) ? ((cursor_t *)cursor)->cursw.cur_word : 0; /* CURWD */
     case 10: return Look_ahead(1) ? ((cursor_t *)cursor)->curs.next_byte : 0;  /* NXTCH */
     case 11: return Look_ahead(3) ? ((cursor_t *)cursor)->cursw.next_word : 0;  /* NXTWD */
-    case 12:	return Get_offset(oa.wk1_blocks, oa.high_s);
+    case 12:
+    {
+        toff_t tmp = {.bp = oa.high_s}; return Get_offset(oa.wk1_blocks, tmp);
+    }
     case 13:	return Get_offset(oa.tblock[1], oa.toff[1]);
     case 14:	return Get_offset(oa.tblock[2], oa.toff[2]);
     case 15:	return Get_offset(oa.tblock[3], oa.toff[3]);
@@ -592,7 +593,12 @@ byte err_read_only[] = { "\x20" "assignment to read only variable" };
 Is called for calc errors. Prints an error message, and returns to
 the module level (the compiler cleans up the stack).
 *************************************************************************/
-static void Calc_error(pointer err_msg) {
+#ifdef MSDOS
+__declspec(noreturn)
+#else
+__attribute__((noreturn))
+#endif
+    static void Calc_error(pointer err_msg) {
 
     byte len, len1;
 
@@ -750,11 +756,10 @@ static void Scan() {
     pointer str_p;
     byte i, b, c;
 
-    while ((tok_ptr[0] == ' ') || (tok_ptr[0] == TAB)) {
+    while (*tok_ptr == ' ' || *tok_ptr == TAB)
         tok_ptr++;
-    }
 
-    switch (Char_type(tok_ptr[0])) {
+    switch (Char_type(*tok_ptr)) {
 
     case 0:	 /* error */
         Calc_error(err_illegal);
@@ -775,31 +780,28 @@ static void Scan() {
         tok_ptr++;
         break;
     case 3:	 /* < */
-        tok_ptr++;
         token = type_relat;
-        if (tok_ptr[0] == '>')
+        if (*++tok_ptr == '>') {
             token_subtype = 1;
-        else if (tok_ptr[0] == '=')
+            tok_ptr++;
+        } else if (*tok_ptr == '=') {
             token_subtype = 5;
-        else {
+            tok_ptr++;
+        }  else
             token_subtype = 4;
-            tok_ptr--;
-        }
-        tok_ptr++;
         break;
     case 4:	 /* > */
         token = type_relat;
-        if (tok_ptr[1] == '=') {
+        if (*++tok_ptr == '=') {
             token_subtype = 3;
             tok_ptr++;
         }
         else
             token_subtype = 2;
-        tok_ptr++;
         break;
     case 5:	 /* +,- */
         token = type_plsmin;
-        token_subtype = Char_subtype(tok_ptr[0]);
+        token_subtype = Char_subtype(*tok_ptr);
         tok_ptr++;
         break;
     case 6:	 /* ( */
@@ -816,11 +818,10 @@ static void Scan() {
         break;
     case 9:	 /* ~,! */
         token = type_unary;
-        token_subtype = Char_subtype(tok_ptr[0]);
-        tok_ptr++;
+        token_subtype = Char_subtype(*tok_ptr++);
         break;
     case 10:	/* * */
-        if (tok_ptr[1] == '*') {
+        if (*++tok_ptr == '*') {
             token = type_expo;
             tok_ptr++;
         }
@@ -828,29 +829,26 @@ static void Scan() {
             token = type_muldiv;
             token_subtype = 0;
         }
-        tok_ptr++;
         break;
     case 11:	 /* /,\ */
         token = type_muldiv;
-        token_subtype = Char_subtype(tok_ptr[0]);
-        tok_ptr++;
+        token_subtype = Char_subtype(*tok_ptr++);
         break;
 
 
     case 12:	 /* |,&,^ */
         token = type_logic;
-        token_subtype = Char_subtype(tok_ptr[0]);
-        tok_ptr++;
+        token_subtype = Char_subtype(*tok_ptr++);
         break;
 
 
     case 13:	break;
     case 14:	 /* A..Z */
-        tok_ptr[0] = Upper(tok_ptr[0]);
+        *tok_ptr = Upper(*tok_ptr);
 
         for (i = 1; Char_type(tok_ptr[i]) == ch_letter; i++)
             tok_ptr[i] = Upper(tok_ptr[i]);
-        if (tok_ptr[0] == 'N') {
+        if (*tok_ptr == 'N') {
             if (Char_type(tok_ptr[1]) == ch_number && Char_type(tok_ptr[2]) != ch_letter) {
                 token = type_nreg;
                 token_val = tok_ptr[1] - '0'; /* return the index */
@@ -864,7 +862,7 @@ static void Scan() {
                 return;
             }
         }
-        else if (tok_ptr[0] == 'S') {
+        else if (*tok_ptr == 'S') {
             b = Find_index(tok_ptr[1], s_var_names);
             if (b < s_var_names[0] && Char_type(tok_ptr[2]) != ch_letter) {
                 token = type_sreg;
@@ -913,21 +911,11 @@ Compare two signed dwords:  If num1 is greater - return 1;
     else if num2 is greater - return 2; else return 0;
 *************************************************************************/
 static byte Cmp_dw(dword num1, dword num2) {
-    byte sign1, sign2;
     if (num1 == num2)
         return 0;
-    sign1 = (num1 & signBit) != 0;
-    sign2 = (num2 & signBit) != 0;
-    if (num1 > num2) {
-        if (sign1 && !sign2)
-            return 2;
-        else
-            return 1;
-    }
-    else if (sign2 && !sign1)
-        return 1;
-    else
-        return 2;
+    sdword snum1 = (sdword)num1;
+    sdword snum2 = (sdword)num2;
+    return snum1 > snum2 ? 1 : 2;
 }
 
 

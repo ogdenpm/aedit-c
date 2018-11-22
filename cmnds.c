@@ -1296,19 +1296,19 @@ nestedProc void Exchange_a_char(byte ch, boolean string_input) {
         /* the byte at high_s is deleted, and the new char is inserted
            at low_e. if a tag was pointing to high_s, it must point now
            to the byte before low_e (if there is one). */
-        saver = oa.toff[ed_tagw];
+        saver = oa.toff[ed_tagw].bp;
         for (i = 1; i <= num_tag; i++) {
             if (oa.tblock[i] == oa.wk1_blocks
-                && oa.toff[i] >= oa.low_e
-                && oa.toff[i] < oa.high_s) {
+                && oa.toff[i].bp >= oa.low_e
+                && oa.toff[i].bp < oa.high_s) {
                 if (oa.low_e > oa.low_s)
-                    oa.toff[i] = oa.low_e - 1;
+                    oa.toff[i].bp = oa.low_e - 1;
                 else
-                    oa.toff[i] = oa.high_s;
+                    oa.toff[i].bp = oa.high_s;
             }
         }
         if (in_other != w_in_other)
-            oa.toff[ed_tagw] = saver;
+            oa.toff[ed_tagw].bp = saver;
     }
 } /* exchange_a_char */
 
