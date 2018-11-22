@@ -73,8 +73,8 @@ byte Not_cursor_movement(byte cmd);
 void Add_str_special(pointer str_p);
 byte Input_line(pointer prompt, pointer prev_string_p);
 byte Input_filename(pointer prompt, pointer prev_string_p);
-byte Input_yes_no(pointer prompt, byte y_type);
-byte Input_yes_no_from_console(pointer prompt, byte y_type, boolean in_replace);
+byte Input_yes_no(char *prompt, byte y_type);
+byte Input_yes_no_from_console(char *prompt, byte y_type, boolean in_replace);
 byte Input_command(pointer prompt);
 byte Input_fr();
 byte Hit_space();
@@ -307,6 +307,7 @@ pointer Print_number(dword d_number, byte b_width, byte base);
 void Init_str(pointer str_p, int max_len);
 void Reuse_str(pointer str_p, int max_len);
 void Add_str_char(byte ch);
+void Add_str(char *s);      // C string variant of Add_str_str
 void Add_str_str(pointer str_p);
 void Add_str_num(dword num, byte base);
 void Init_scan(pointer str_p);
@@ -347,7 +348,7 @@ byte Port_csts();                /* AEDASM */
 pointer Unfold_to_screen(pointer line); /* IOCASM */
 
 /*****   XNXSYS.PLM   *****/
-pointer Getenv(pointer symbol_p);
+char *Getenv(pointer symbol_p);
 
 /*!****   INFACE   *****/
 //address tgetstr_(pointer symbol_p);

@@ -135,9 +135,9 @@ void Macro_file_error(pointer string) {
     byte macro_error_string[81];
 
     Init_str(macro_error_string, sizeof(macro_error_string));
-    Add_str_str("\xe" "error in line ");
+    Add_str("error in line ");
     Add_str_num(macro_line, 10);    /* Line number */
-    Add_str_str("\x2" ": ");
+    Add_str(": ");
     Add_str_str(string);
 
     error_status.from_macro_file = _TRUE;
@@ -1386,14 +1386,14 @@ static void Macro_insert() {
 
 static void Macro_list() {
 
-    byte macros_str[] = { "\x09" " Macros: " };
+    char *macros_str = " Macros: " ;
     byte message_len = 60; /* length of message line w/o 'other' , 'forward' */
 
     /*!!!    CALL need_screen;   TURN OFF MACRO_SUPPRESS IF ON */
     force_writing = _TRUE;
     macro_at = macros;                /* POINTER TO NEXT MACRO    */
     Init_str(tmp_str, sizeof(tmp_str));
-    Add_str_str(macros_str);
+    Add_str(macros_str);
     while (macro_at < macro_end) {
         if (tmp_str[0] + macro_name_length >= message_len && tmp_str[0] != 9) {
             /* 9 is the length of macros_str */
@@ -1403,7 +1403,7 @@ static void Macro_list() {
                 return;
             }
             Init_str(tmp_str, sizeof(tmp_str));
-            Add_str_str(macros_str);
+            Add_str(macros_str);
         }
         Add_str_special(macro_at);
         Add_str_char(' ');

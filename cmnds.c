@@ -937,7 +937,7 @@ void H_cmnd() {
             while (num_output != 0) {
                 len = Min(10, num_output);
                 Init_str(tmp_str, sizeof(tmp_str));
-                Add_str_str("\x6" " Hex: ");
+                Add_str(" Hex: ");
                 for (i = 1; i <= len; i++, cursor++) {
                     ch = *cursor;
                     if (ch == LF) {

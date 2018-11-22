@@ -137,6 +137,10 @@ void Add_str_char(byte ch) {
 } /* add_str_char */
 
 
+void Add_str(char *s) {
+    while (*s)
+        Add_str_char(*s++);
+}
 
 
 void Add_str_str(pointer str_p) {

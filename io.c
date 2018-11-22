@@ -650,7 +650,7 @@ byte Test_file_existence(byte fnum) {
     }
 
     Rebuild_screen();
-    if ((ans = Input_yes_no_from_console("\x18" "overwrite existing file?", _FALSE, _FALSE)) == CONTROLC)
+    if ((ans = Input_yes_no_from_console("overwrite existing file?", _FALSE, _FALSE)) == CONTROLC)
         return _TRUE;
     return ~ans;
 } /* test_file_existence */

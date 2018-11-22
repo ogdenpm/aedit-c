@@ -350,13 +350,13 @@ static void Do_macro_file() {
             Move_name(s_macro_file, t_str);
             Init_str(s_macro_file, string_len_plus_1);
 #ifdef MSDOS
-            Add_str_str(Getenv("USERPROFILE"));
+            Add_str(Getenv("USERPROFILE"));
 #else
-            Add_str_str(Getenv("HOME"));
+            Add_str(Getenv("HOME"));
 #endif
             if (s_macro_file[0] != 0)
                 Add_str_char('/');
-            Add_str_str("\x9" "aedit.mac");
+            Add_str("aedit.mac");
 
             Openi(mac_file, 2);    /* TRY TO OPEN DEFAULT MACRO FILE    */
             if (excep != 0) {
@@ -408,7 +408,7 @@ static void Start_error(pointer msg) {
     oa.file_disposition = keep_file;
     Init_str(str, sizeof(str));
     Add_str_str(msg);
-    Add_str_str("\x9" ", NEAR: \"");
+    Add_str(", NEAR: \"");
     Add_str_special(tmp_str); /* last token */
     Add_str_char('"');
     if (in_invocation_line)
@@ -1289,14 +1289,14 @@ static void Display_filenames() {
     }
     else {
         Init_str(tmp_str, sizeof(tmp_str));
-        Add_str_str("\x8" "Editing ");
+        Add_str("Editing ");
         Add_str_str(oa.input_name);
         if (oa.file_disposition == lost_file) {
             /* WARN THAT LOST BLOCKS */
-            Add_str_str("\x14" " which has lost text");
+            Add_str(" which has lost text");
         }
         else if (oa.output_name[0] > 0) {
-            Add_str_str("\x4" " to ");
+            Add_str(" to ");
             Add_str_str(oa.output_name);
         }
         Print_message(tmp_str);
@@ -1365,7 +1365,7 @@ static byte Keep_after_all() {
     byte ans;
 
     Rebuild_screen();
-    ans = Input_yes_no_from_console("\x11" "all changes lost?", _FALSE, _FALSE);
+    ans = Input_yes_no_from_console("all changes lost?", _FALSE, _FALSE);
     if (ans == CONTROLC)
         return _TRUE;
     return ~ans;
@@ -1685,7 +1685,7 @@ void Q_cmnd() {
             if (rename_done)
                 Put_access_rights(files[nfile].name);
 #endif
-            Add_str_str("\x11" " has been written");
+            Add_str(" has been written");
             if (tmp_str[0] > string_len)
                 tmp_str[0] = string_len;
             Move_name(tmp_str, input_buffer);  /* PUT END MSG ASIDE */
@@ -1735,15 +1735,15 @@ void Q_cmnd() {
                 Init_str(s_init, string_len_plus_1);
                 Add_str_str(s_input_file);
                 if (s_output_file[0] != 0) {
-                    Add_str_str("\x4" " TO ");
+                    Add_str(" TO ");
                     Add_str_str(s_output_file);
                 }
                 if (oa.file_disposition == view_only) {
-                    Add_str_str("\x3" " VO");
+                    Add_str(" VO");
                 }
                 else if (oa.file_disposition == lose_file ||
                     oa.file_disposition == lost_file) {
-                    Add_str_str("\x3" " FO");
+                    Add_str(" FO");
                 }
             }
             if (Input_filename("\x22" "enter [file [TO file | VO | FO]]: ", s_init) == CONTROLC) {

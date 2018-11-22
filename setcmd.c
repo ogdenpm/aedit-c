@@ -96,7 +96,7 @@ static void Set_error(pointer msg) {
     SET_INPUT_YES_NO                SET VERSION OF INPUT_YES_NO
 */
 
-static void Set_input_yes_no(pointer prompt_string, pointer current_value_p) {
+static void Set_input_yes_no(char *prompt_string, pointer current_value_p) {
     byte ch;
 
     if (set_from_macrofile) {
@@ -156,14 +156,14 @@ static byte Set_input_line(pointer prompt, pointer prev_input) {
 
 
 static void Set_autocr() {
-    Set_input_yes_no("\x1a" "Insert <nl> automatically?", &crlf_insert);
+    Set_input_yes_no("Insert <nl> automatically?", &crlf_insert);
 } /* set_autocr */
 
 
 
 
 static void Set_bak_file() {
-    Set_input_yes_no("\x12" "Create .BAK files?", &backup_files);
+    Set_input_yes_no("Create .BAK files?", &backup_files);
 } /* set_bak_file */
 
 
@@ -172,7 +172,7 @@ static void Set_bak_file() {
 static void Set_case() {
     /* Cheat. Asking about the complement value of the flag. */
     find_uplow = ~find_uplow;
-    Set_input_yes_no("\x1d" "Consider case of Find target?", &find_uplow);
+    Set_input_yes_no("Consider case of Find target?", &find_uplow);
     find_uplow = ~find_uplow;
 } /* set_case */
 
@@ -185,7 +185,7 @@ static void Set_case() {
                                             SCREEN
 */
 static void Set_display() {
-    Set_input_yes_no("\x18" "Display macro execution?", &dont_stop_macro_output);
+    Set_input_yes_no("Display macro execution?", &dont_stop_macro_output);
 } /* set_display */
 
 
@@ -253,7 +253,7 @@ static void Set_e_delimit() {
 
 
 static void Set_go() {
-    Set_input_yes_no("\x29" "Continue macro execution after a failure?",
+    Set_input_yes_no("Continue macro execution after a failure?",
         &go_flag[macro_exec_level]);
 } /* set_go */
 
@@ -262,7 +262,7 @@ static void Set_go() {
 
 static void Set_highbit() {
 
-    Set_input_yes_no("\x23" "Display parity-on characters as is?", &highbit_flag);
+    Set_input_yes_no("Display parity-on characters as is?", &highbit_flag);
     V_cmnd();  /* force re_view from scratch */
     if (w_in_other == in_other)
         w_dirty = _TRUE;
@@ -273,7 +273,7 @@ static void Set_highbit() {
 
 
 static void Set_indent() {
-    Set_input_yes_no("\x26" "Automatically indent during insertion?", &auto_indent);
+    Set_input_yes_no("Automatically indent during insertion?", &auto_indent);
 } /* set_indent */
 
 
@@ -285,7 +285,7 @@ static void Set_indent() {
                                 found, else any matching string
 */
 static void Set_k_token() {
-    Set_input_yes_no("\x18" "Find only token strings?", &token_find);
+    Set_input_yes_no("Find only token strings?", &token_find);
 } /* set_k_token */
 
 
@@ -341,9 +341,9 @@ static void Set_margin() {
 
     Init_str(tmp_str, sizeof(tmp_str));
     Add_str_num(indent_margin, 10);
-    Add_str_str("\x3" " , ");
+    Add_str(" , ");
     Add_str_num(left_margin, 10);
-    Add_str_str("\x3"" , ");
+    Add_str(" , ");
     Add_str_num(right_margin, 10);
     if (Set_input_line("\x13" "Indent,Left,Right: ", tmp_str) == CONTROLC)
         return;
@@ -385,24 +385,24 @@ static void Set_margin() {
     }
 
     Init_str(tmp_str, sizeof(tmp_str));
-    Add_str_str("\x4" "bad ");
+    Add_str("bad ");
 
     if (new_indent && (indent > 253 || indent >= right)) {
-        Add_str_str("\x6" "indent");
+        Add_str("indent");
         num = indent;
     }
     else if (new_left && (left > 253 || left >= right)) {
-        Add_str_str("\x4" "left");
+        Add_str("left");
         num = left;
     }
     else if (new_right && (right == 0 || right > 254 ||
         right <= left || right <= indent)) {
-        Add_str_str("\x5" "right");
+        Add_str("right");
         num = right;
     }
 
     if (tmp_str[0] != 4 /* there are errors */) {
-        Add_str_str("\x9" " margin: ");
+        Add_str(" margin: ");
 #pragma warning(disable:6001)
         Add_str_num(num, 10);
         Set_error(tmp_str);
@@ -420,14 +420,14 @@ static void Set_margin() {
 
 
 static void Set_notab() {
-    Set_input_yes_no("\x17" "Insert blanks for tabs?", &blank_for_tab);
+    Set_input_yes_no("Insert blanks for tabs?", &blank_for_tab);
 } /* set_notab */
 
 
 
 
 static void Set_pause() {
-    Set_input_yes_no("\x18" "Pause before continuing?", &pause_before_continue);
+    Set_input_yes_no("Pause before continuing?", &pause_before_continue);
 } /* set_pause */
 
 
@@ -441,12 +441,12 @@ static void Set_radix() {
     byte radices[] = { 5, 10, 16,  8,  2,  0 };
     byte set_radix_prompt[] = { "\x4f" RVID "Alpha     Binary    Decimal   Hex      "
                                       RVID "Octal                                 " };
-    byte strings[] = {
-           "\x7" "Decimal"
-           "\x3" "Hex    "
-           "\x5" "Octal  "
-           "\x6" "Binary "
-           "\x5" "Alpha  "
+    char *strings[] = {
+           "Decimal",
+           "Hex    ",
+           "Octal  ",
+           "Binary ",
+           "Alpha  "
     };
 
     while (1) {
@@ -455,8 +455,8 @@ static void Set_radix() {
         }
         else {
             Init_str(tmp_str, sizeof(tmp_str));
-            Add_str_str("\xf" "Current radix: ");
-            Add_str_str(&strings[Find_index(radix, radices) * 8]);
+            Add_str("Current radix: ");
+            Add_str(strings[Find_index(radix, radices)]);
             Print_message(tmp_str);
             ch = Input_command(set_radix_prompt);
             if ((ch == CONTROLC) || (ch == esc_code) || (ch == CR)) {
@@ -482,7 +482,7 @@ static void Set_radix() {
                                     AND LIST THE LINE CONTAIINIG THE MATCH.
 */
 static void Set_showfind() {
-    Set_input_yes_no("\x1d" "List lines on multiple finds?", &show_find);
+    Set_input_yes_no("List lines on multiple finds?", &show_find);
 } /* set_showfind */
 
 

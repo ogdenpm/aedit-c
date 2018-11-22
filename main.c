@@ -385,21 +385,16 @@ void ms_sleep(unsigned n) {
 }
 #endif
 
-byte interface_buffer[100];
-/* The strings in interface_buffer are null-terminated and length preceeded. */
 
-pointer Getenv(pointer symbol_p) {
+char *Getenv(pointer symbol_p) {
     /****************************************************************
        Gets a pointer to null terminated shell symbol, puts the value
        of that symbol in interface_buffer, and returns a pointer to it.
     ****************************************************************/
 
-    char *str_p;
+    char *s;
 
-    if ((str_p = getenv(symbol_p)) == NULL)
-        str_p = "";
-    strcpy(interface_buffer + 1, str_p);
-    interface_buffer[0] = (byte)strlen(str_p);
-    return interface_buffer;
-
+    if ((s = getenv(symbol_p)) == NULL)
+        s = "";
+    return s;
 } /* getenv */

@@ -100,7 +100,7 @@ static void Block_delete() {
 
     if (Saved_in_block() == _FALSE) {
         Rebuild_screen();      /* BRING BACK DISPLAY IF SUPPRESSED */
-        ch = Input_yes_no_from_console("\x24" "cannot save in memory - save anyway?", _TRUE, _FALSE);
+        ch = Input_yes_no_from_console("cannot save in memory - save anyway?", _TRUE, _FALSE);
         if (Have_controlc()) {
             Jump_tagi();
             b_is_done = _TRUE;

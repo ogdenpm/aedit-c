@@ -239,7 +239,7 @@ void Add_str_special(pointer str_p) {
         ch = str_p[i];
         if (ch == CR) {
             if (At_crlf(str_p, (byte)i, _FALSE)) {
-                Add_str_str("\x4" "<nl>");
+                Add_str("<nl>");
                 i++;
             }
             else {
@@ -254,7 +254,7 @@ void Add_str_special(pointer str_p) {
         }
 #endif
         else if (ch == TAB) {
-            Add_str_str("\x5" "<TAB>");
+            Add_str("<TAB>");
         }
         else if (Is_illegal(ch) || ch == LF) {
             Add_three(ch);
@@ -282,7 +282,7 @@ boolean wait_in_text = _FALSE;
    /* CONTROLC.                                                              */
    /*                                                                        */
    /**************************************************************************/
-byte Input_yes_no(pointer prompt, byte y_type) {
+byte Input_yes_no(char *prompt, byte y_type) {
     byte ch, i_row, i_col;
 
     /*BEGIN*/
@@ -294,14 +294,16 @@ byte Input_yes_no(pointer prompt, byte y_type) {
     Add_str_char(rvid);     /* NEED REVERSE VIDEO    */
 
     if (macro_exec_level == 0) {
-        Add_str_str(prompt);
+        Add_str(prompt);
         if (y_type)
-            Add_str_str("\xc" " ([y] or n) ");
+            Add_str(" ([y] or n) ");
         else
-            Add_str_str("\xc" " (y or [n]) ");
+            Add_str(" (y or [n]) ");
         Print_prompt(tmp_str);
-        if (wait_in_text) Put_goto(i_col, i_row);        /* PUT CURSOR BACK */
-        else Put_re_col(tmp_str[0]);/* MOVE CURSOR TO END OF LINE*/
+        if (wait_in_text)
+            Put_goto(i_col, i_row);        /* PUT CURSOR BACK */
+        else
+            Put_re_col(tmp_str[0]);/* MOVE CURSOR TO END OF LINE*/
     }
 
     ch = Cmd_ci();                        /* GET USER RESPONSE */
@@ -323,7 +325,7 @@ byte Input_yes_no(pointer prompt, byte y_type) {
 /* Same as input_yes_no, but the answer is not taken from macro, and is   */
 /* not buffered.                                                          */
 /**************************************************************************/
-byte Input_yes_no_from_console(pointer prompt, byte y_type, boolean in_replace) {
+byte Input_yes_no_from_console(char *prompt, byte y_type, boolean in_replace) {
     byte save_macro_level;
     boolean save_macro_def;
     boolean save_force_writing;
@@ -791,7 +793,8 @@ byte Input_command(pointer prompt) {
 
     last_cmd = command;
 
-    if (Not_cursor_movement(last_cmd)) Print_prompt_and_repos(prompt);
+    if (Not_cursor_movement(last_cmd))
+        Print_prompt_and_repos(prompt);
     Clear_count_message();
 
     edit_stat.mode = single_char;
@@ -1041,24 +1044,25 @@ byte Input_fr() {
     /*BEGIN*/
     Init_str(fr_str, sizeof(fr_str));
     if (command == 'F') { /* 'F' or '-' */
-        if (minus_type) Add_str_char('-');
-        Add_str_str("\x5" "Find ");
+        if (minus_type)
+            Add_str_char('-');
+        Add_str("Find ");
     }
     else {
         if (command == '?')
             Add_str_char('?');
-        Add_str_str("\x8" "Replace ");
+        Add_str("Replace ");
     }
     Add_str_char('{');
     if (token_find)
-        Add_str_str("\x3" "Tk ");
+        Add_str("Tk ");
     if (!find_uplow)
-        Add_str_str("\x3" "Cs ");
+        Add_str("Cs ");
     if (show_find)
-        Add_str_str("\x3" "Sh ");
+        Add_str("Sh ");
     if (fr_str[fr_str[0]] == ' ')
         fr_str[0] = fr_str[0] - 1;
-    Add_str_str("\x3" "} \"");
+    Add_str("} \"");
 
     Move_name(target, tmp_target);
     Move_name(replacement, tmp_replacement);
@@ -1073,7 +1077,7 @@ f: edit_stat.reediting = reediting_target;
         Init_str(tmp_str, 81);
         Add_str_str(fr_str);
         Add_str_special(tmp_target);
-        Add_str_str("\x8" "\" with \"");
+        Add_str("\" with \"");
         edit_stat.reediting = reediting_replacement;
         edit_stat.mode = from_replace;
         a = Input_l(tmp_str, tmp_replacement);

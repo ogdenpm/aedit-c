@@ -604,7 +604,7 @@ __attribute__((noreturn))
 
     Init_str(tmp_str, sizeof(tmp_str));
     Add_str_str(err_msg);
-    Add_str_str("\x4" "    ");
+    Add_str("    ");
     while (tok_ptr <= input_buffer + input_buffer[0] &&
         (Char_type(tok_ptr[0]) == ch_letter || Char_type(tok_ptr[0]) == ch_number)) {
         tok_ptr++;
@@ -1503,12 +1503,12 @@ void C_cmnd() {
         else {
             Add_str_num(result, 10);
         }
-        Add_str_str("\x2" "  ");
+        Add_str("  ");
         Add_str_num(result, 16);
         Add_str_char('H');
     }
     else {
-        Add_str_str("\x5" "     ");
+        Add_str("     ");
         /* the message should be longer than 5,
             otherwise it will not be printed in batch mode */
         Add_str_special(result_ptr);

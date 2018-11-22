@@ -38,10 +38,10 @@ static void Print_counters() {
 
     if (!In_macro_exec()) {
         Init_str(tmp_str, sizeof(tmp_str));
-        Add_str_str("\xb" "    found: ");
+        Add_str("    found: ");
         Add_str_num(cnt_fnd, 10);
         if (command != 'F') { /* R or ? */
-            Add_str_str("\xe" "    replaced: ");
+            Add_str("    replaced: ");
             Add_str_num(cnt_rep, 10);
         }
         force_writing = _TRUE;
@@ -106,7 +106,7 @@ void Fr_cmnd() {
     if (!chug_on) {                /* FAILURE */
         if (macro_exec_level == 0) {
             Init_str(tmp_str, sizeof(tmp_str));
-            Add_str_str("\xc" "not found: \"");
+            Add_str("not found: \"");
                 Add_str_special(target);
             Add_str_char('"');
             Print_message(tmp_str);
@@ -145,7 +145,7 @@ void Fr_cmnd() {
             macro_exec_level = 0;
             Re_view();
             macro_exec_level = save_macro_level;
-            i = Input_yes_no_from_console("\xe" "ok to replace?", _FALSE, _TRUE);
+            i = Input_yes_no_from_console("ok to replace?", _FALSE, _TRUE);
             if (Have_controlc()) {
                 infinite = _FALSE;
                 count = 1;/* FORCE END */
