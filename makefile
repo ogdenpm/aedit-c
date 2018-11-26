@@ -24,5 +24,7 @@ $(OBJDIR)/%.o : %.c
 clean:
 	rm -f $(OBJDIR)/* $(DEPS)/*
 
+distclean:
+	rm -fr $(EXEDIR) $(OBJDIR) $(DEPS)
 
 -include $(DEPS)/$(OBJS:.o=.d)

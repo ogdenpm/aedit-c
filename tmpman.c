@@ -77,7 +77,6 @@ typedef struct {
     block_t *cur_block_ptr;
 } vf_struc_t;
 
-char *template = "_workXXXXXX";
 /*
    The fields of the structure above:
 

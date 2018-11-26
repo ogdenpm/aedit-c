@@ -351,16 +351,14 @@ word ci_read(byte *buf) {
                 return 0;
         case 1:
             c = _getch();
-#if MSDOS
+#ifdef MSDOS
             if (c == 0 || c == 0xe0)
                 escSeq = mapExtended(c, _getch()); // with either pick up escape sequence or retry
-            else if (c == ESC) {                   // windows reads keyboard directly so ESC will be a single key press
-#else
-            if (c == ESC) {                       // unix may have escape sequence or a single escape key
-                ms_sleep(5);                      // pause a little to see if any more of a sequence
-                if (kbhit() == 0)
+            else
 #endif
-                {  // sole ESC
+            if (c == ESC) {                       // unix may have escape sequence or a single escape key 
+                ms_sleep(5);                      // pause a little to see if any more of a sequence
+                if (kbhit() == 0) {               // sole ESC
                     if (0 < input_codes[esc_code - first_code].code[0] && input_codes[esc_code - first_code].code[0] <= 4)
                         toCstr(escCode, input_codes[esc_code - first_code].code);       // replace with sequence for esc_code
                     else

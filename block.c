@@ -144,12 +144,10 @@ static void Block_block() {
 /* PUT THE BLOCK TO A FILE. */
 
 static void Block_put() {
-    byte ch;
 
     //redo:
     while (1) {
-        ch = Input_filename("\xd" "Output file: ", s_put_file);
-        if (ch == CONTROLC)
+        if (Input_filename("\xd" "Output file: ", s_put_file) == CONTROLC)
             Jump_tagi();
         else if (input_buffer[0] == 0)
             Error(invalid_null_name);
@@ -194,7 +192,7 @@ static void Draw_first_at_sign(byte ch) {
     byte i;
 
     /* IF ON SCREEN, FIND THE ROW CONTAINING THE STARTING @    */
-    if (oa.tblock[ed_tagi] == oa.wk1_blocks        &&
+    if (oa.tblock[ed_tagi] == oa.wk1_blocks          &&
         oa.toff[ed_tagi].bp >= have[first_text_line] &&
         oa.toff[ed_tagi].bp < have[message_line]) {
         if (!first_at_sign_is_here) {
@@ -205,9 +203,8 @@ static void Draw_first_at_sign(byte ch) {
             first_at_sign_is_here = _TRUE;
         }
     }
-    else {
+    else
         first_at_sign_is_here = _FALSE;
-    }
 } /* draw_first_at_sign */
 
 
